@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { admin } from "better-auth/plugins";
+import { admin, lastLoginMethod } from "better-auth/plugins";
 import { reactStartCookies } from "better-auth/react-start";
 import { env } from "@/env";
 import { db } from "../database/drizzle";
@@ -37,5 +37,5 @@ export const auth = betterAuth({
       enabled: true,
     },
   },
-  plugins: [admin(), reactStartCookies()],
+  plugins: [admin(), lastLoginMethod(), reactStartCookies()],
 });

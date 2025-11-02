@@ -1,38 +1,36 @@
-import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Field, FieldSeparator } from "@/components/ui/field";
+import { Field } from "@/components/ui/field";
 import { authClient } from "@/lib/auth/auth-client";
+import { LastUsedBadge } from "./last-used-badge";
 
 interface AuthSocialProvidersProps {
-  onLoadingChange?: (isLoading: boolean) => void;
+  setIsLoading: (isLoading: boolean) => void;
+  isLoading: boolean;
+  lastMethod?: string | null;
 }
 
-export function AuthSocialProviders({ onLoadingChange }: AuthSocialProvidersProps) {
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSelect = async (provider: "google" | "github") => {
+export function AuthSocialProviders({ setIsLoading, isLoading, lastMethod }: AuthSocialProvidersProps) {
+  async function handleSocialProviderSelect(provider: "google" | "github") {
     setIsLoading(true);
-    onLoadingChange?.(true);
 
-    const { error } = await authClient.signIn.social({
-      provider,
-      callbackURL: "/",
-      errorCallbackURL: "/unauthorized",
-    });
-
+    const { error } = await authClient.signIn.social({ provider, callbackURL: "/", errorCallbackURL: "/unauthorized" });
     if (error) {
       setIsLoading(false);
-      onLoadingChange?.(false);
       toast.error(error.message || "Unable to continue with the selected provider.");
     }
-  };
+  }
 
   return (
-    <>
-      <FieldSeparator>Or</FieldSeparator>
-      <Field className="grid gap-4 sm:grid-cols-2">
-        <Button disabled={isLoading} onClick={() => handleSelect("google")} type="button" variant="outline">
+    <Field className="grid gap-4 sm:grid-cols-2">
+      <div className="relative">
+        <Button
+          className="w-full"
+          disabled={isLoading}
+          onClick={() => handleSocialProviderSelect("google")}
+          type="button"
+          variant="outline"
+        >
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <title>Google</title>
             <path
@@ -42,7 +40,16 @@ export function AuthSocialProviders({ onLoadingChange }: AuthSocialProvidersProp
           </svg>
           Continue with Google
         </Button>
-        <Button disabled={isLoading} onClick={() => handleSelect("github")} type="button" variant="outline">
+        {lastMethod === "google" && <LastUsedBadge />}
+      </div>
+      <div className="relative">
+        <Button
+          className="w-full"
+          disabled={isLoading}
+          onClick={() => handleSocialProviderSelect("github")}
+          type="button"
+          variant="outline"
+        >
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <title>Github</title>
             <path
@@ -52,7 +59,8 @@ export function AuthSocialProviders({ onLoadingChange }: AuthSocialProvidersProp
           </svg>
           Continue with Github
         </Button>
-      </Field>
-    </>
+        {lastMethod === "github" && <LastUsedBadge />}
+      </div>
+    </Field>
   );
 }

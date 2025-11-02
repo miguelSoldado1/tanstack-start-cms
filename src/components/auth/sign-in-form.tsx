@@ -12,9 +12,10 @@ import { FormItemWrapper } from "@/components/ui/form-item-wrapper";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { authClient } from "@/lib/auth/auth-client";
-import { FieldDescription } from "../ui/field";
+import { FieldDescription, FieldSeparator } from "../ui/field";
 import { AuthHeader, AuthHeaderDescription, AuthHeaderTitle } from "./auth-header";
 import { AuthSocialProviders } from "./auth-social-providers";
+import { LastUsedBadge } from "./last-used-badge";
 
 const formSchema = z.object({
   email: z.email(),
@@ -31,6 +32,8 @@ export function SignInForm() {
       password: "",
     },
   });
+
+  const lastMethod = authClient.getLastUsedLoginMethod();
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     const { error } = await authClient.signIn.email(data);
@@ -71,12 +74,16 @@ export function SignInForm() {
               </FormItemWrapper>
             )}
           />
-          <Button disabled={isFormSubmitting} type="submit">
-            Sign in
-          </Button>
+          <div className="relative">
+            <Button className="w-full" disabled={isFormSubmitting} type="submit">
+              Sign in with Email
+            </Button>
+            {lastMethod === "email" && <LastUsedBadge />}
+          </div>
         </form>
       </Form>
-      <AuthSocialProviders onLoadingChange={setIsSigningIn} />
+      <FieldSeparator>Or</FieldSeparator>
+      <AuthSocialProviders isLoading={isSigningIn} lastMethod={lastMethod} setIsLoading={setIsSigningIn} />
       <FieldDescription className="text-center">
         Don't have an account? <Link to="/sign-up">Sign up</Link>
       </FieldDescription>

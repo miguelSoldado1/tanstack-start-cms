@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { FieldDescription } from "@/components/ui/field";
+import { FieldDescription, FieldSeparator } from "@/components/ui/field";
 import { Form, FormField } from "@/components/ui/form";
 import { FormItemWrapper } from "@/components/ui/form-item-wrapper";
 import { Input } from "@/components/ui/input";
@@ -81,11 +81,12 @@ export function SignUpForm() {
             )}
           />
           <Button disabled={isFormSubmitting} type="submit">
-            Sign up
+            Sign up with Email
           </Button>
         </form>
       </Form>
-      <AuthSocialProviders onLoadingChange={setIsSigningUp} />
+      <FieldSeparator>Or</FieldSeparator>
+      <AuthSocialProviders isLoading={isSigningUp} setIsLoading={setIsSigningUp} />
       <FieldDescription className="text-center">
         Already have an account? <Link to="/sign-in">Sign in</Link>
       </FieldDescription>
