@@ -5,6 +5,7 @@ import { reactStartCookies } from "better-auth/react-start";
 import { env } from "@/env";
 import { db } from "../database/drizzle";
 import * as schema from "../database/schema";
+import { ac, roles } from "./permissions";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -37,5 +38,5 @@ export const auth = betterAuth({
       enabled: true,
     },
   },
-  plugins: [admin(), lastLoginMethod(), reactStartCookies()],
+  plugins: [admin({ ac, roles, defaultRole: "read", adminRoles: ["admin"] }), lastLoginMethod(), reactStartCookies()],
 });

@@ -8,19 +8,24 @@
     "rules": {
       "performance": {
         "noNamespaceImport": "off",
-        "noBarrelFile": "off"
+        "noBarrelFile": "off",
+        "useTopLevelRegex": "off"
       },
       "style": {
         "noMagicNumbers": "off",
+        "useCollapsedElseIf": "off",
+        "noNonNullAssertion": "off",
         "noNestedTernary": "off",
         "useConsistentTypeDefinitions": {
           "level": "error",
           "options": { "style": "interface" }
-        }
+        },
+        "useBlockStatements": "off"
       },
       "nursery": {
         "useConsistentArrowReturn": "off",
-        "noShadow": "off"
+        "noShadow": "off",
+        "noIncrementDecrement": "off"
       },
       "a11y": {
         "useSemanticElements": "off",
@@ -33,7 +38,8 @@
         "noDocumentCookie": "off"
       },
       "correctness": {
-        "useExhaustiveDependencies": "off"
+        "useExhaustiveDependencies": "off",
+        "noNestedComponentDefinitions": "off"
       },
       "complexity": {
         "noExcessiveCognitiveComplexity": "off"
