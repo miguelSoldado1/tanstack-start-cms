@@ -1,5 +1,3 @@
-"use client";
-
 import { useQueryClient } from "@tanstack/react-query";
 import { UserCog } from "lucide-react";
 import { useState, useTransition } from "react";
@@ -40,6 +38,11 @@ export function UserActionsDropdownMenu({ id }: UserActionsDropdownMenuProps) {
 
   function changeUserRole(userId: string, role: "admin" | "read" | "write") {
     startTransition(async () => {
+      if (userId === id) {
+        toast.error("You cannot change your own role");
+        return;
+      }
+
       const { error } = await authClient.admin.setRole({ userId, role });
       if (error) {
         toast.error("Failed to change user role", { description: error.message });

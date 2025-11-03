@@ -25,11 +25,7 @@ export function SignUpForm() {
   const [isSigningUp, setIsSigningUp] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      name: "",
-      password: "",
-    },
+    defaultValues: { email: "", name: "", password: "" },
   });
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
@@ -38,7 +34,7 @@ export function SignUpForm() {
       return toast.error(error.message || "An error occurred while signing up.");
     }
 
-    navigate({ to: "/" });
+    navigate({ to: "/user" });
   }
 
   const isFormSubmitting = form.formState.isSubmitting || isSigningUp;

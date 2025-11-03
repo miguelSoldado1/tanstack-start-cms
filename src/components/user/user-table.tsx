@@ -1,5 +1,3 @@
-"use client";
-
 import { useServerFn } from "@tanstack/react-start";
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
@@ -35,7 +33,7 @@ export function UserTable() {
   return (
     <section>
       <DataTable table={table}>
-        <DataTableToolbar table={table}>
+        <DataTableToolbar table={table} refetch={query.refetch} isLoading={query.isFetching}>
           <DataTableSortList table={table} />
         </DataTableToolbar>
       </DataTable>

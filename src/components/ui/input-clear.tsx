@@ -1,5 +1,3 @@
-"use client";
-
 import { CircleXIcon } from "lucide-react";
 import { useRef } from "react";
 import { Input } from "@/components/ui/input";

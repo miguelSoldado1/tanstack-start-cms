@@ -1,5 +1,3 @@
-"use client";
-
 import { ChevronDown, ChevronsUpDown, ChevronUp, X } from "lucide-react";
 import {
   DropdownMenu,

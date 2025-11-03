@@ -1,5 +1,3 @@
-"use client";
-
 import { CalendarIcon, XCircle } from "lucide-react";
 import * as React from "react";
 import { Button } from "@/components/ui/button";

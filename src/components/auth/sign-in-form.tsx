@@ -1,5 +1,3 @@
-"use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
@@ -27,10 +25,7 @@ export function SignInForm() {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    defaultValues: { email: "", password: "" },
   });
 
   const lastMethod = authClient.getLastUsedLoginMethod();
@@ -41,7 +36,7 @@ export function SignInForm() {
       return toast.error(error.message || "An error occurred while signing in.");
     }
 
-    navigate({ to: "/" });
+    navigate({ to: "/user" });
   }
 
   const isFormSubmitting = form.formState.isSubmitting || isSigningIn;

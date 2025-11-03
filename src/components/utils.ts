@@ -25,8 +25,10 @@ export function getRoleColorByStatus(role: string): string {
   switch (role) {
     case "admin":
       return getEventColorClasses("sky");
-    case "user":
+    case "read":
       return getEventColorClasses("emerald");
+    case "write":
+      return getEventColorClasses("orange");
     default:
       return getEventColorClasses("gray");
   }
