@@ -1,7 +1,7 @@
 import { formatDate } from "@/lib/format";
-import { DataTableColumnHeader } from "../data-table/data-table-column-header";
-import { Badge } from "../ui/badge";
-import { getRoleColorByStatus } from "../utils";
+import { DataTableColumnHeader } from "../../data-table/data-table-column-header";
+import { Badge } from "../../ui/badge";
+import { getRoleColorByStatus } from "../../utils";
 import { UserActionsDropdownMenu } from "./user-actions-dropdown-menu";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { user } from "@/lib/database/schema";

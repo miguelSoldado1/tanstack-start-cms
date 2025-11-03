@@ -1,15 +1,12 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { UsersRoundIcon } from "lucide-react";
+import { PackageOpenIcon, UsersRoundIcon } from "lucide-react";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import type { NavigationItem } from "@/components/sidebar/nav-main";
 
 const navigationData: NavigationItem[] = [
-  {
-    title: "Users",
-    url: "/user",
-    icon: UsersRoundIcon,
-  },
+  { title: "Users", url: "/user", icon: UsersRoundIcon },
+  { title: "Products", url: "/product", icon: PackageOpenIcon },
 ];
 
 export const Route = createFileRoute("/_dashboard")({

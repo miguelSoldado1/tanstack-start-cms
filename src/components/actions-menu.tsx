@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, type LinkProps } from "@tanstack/react-router";
 import clsx from "clsx";
 import { DownloadIcon, EditIcon, EllipsisIcon, TrashIcon } from "lucide-react";
 import * as DropdownMenuCore from "@/components/ui/dropdown-menu";
@@ -15,7 +15,7 @@ export function ActionsMenuTriggerEllipsis() {
   );
 }
 
-export function ActionsMenuEditItemLink({ className, ...props }: React.ComponentProps<typeof Link>) {
+export function ActionsMenuEditItemLink({ className, ...props }: LinkProps & { className?: string }) {
   return (
     <DropdownMenuCore.DropdownMenuItem asChild>
       <Link className={clsx("cursor-pointer", className)} {...props}>

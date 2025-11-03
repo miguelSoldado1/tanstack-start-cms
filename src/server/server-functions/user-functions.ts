@@ -43,6 +43,7 @@ async function getTableHandler(input: z.infer<typeof getTableDataInput>) {
     pageCount: Math.ceil(totalCount[0].count / queryParams.limit),
   };
 }
+
 export const getTableUsers = createServerFn()
   .middleware([authMiddleware])
   .inputValidator(getTableDataInput)

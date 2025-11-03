@@ -4,14 +4,14 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import * as ActionsMenuCore from "@/components/actions-menu";
 import { authClient } from "@/lib/auth/auth-client";
-import { DeleteConfirmationDialog } from "../delete-confirmation-dialog";
+import { DeleteConfirmationDialog } from "../../delete-confirmation-dialog";
 import {
   DropdownMenuItem,
   DropdownMenuPortal,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
-} from "../ui/dropdown-menu";
+} from "../../ui/dropdown-menu";
 
 interface UserActionsDropdownMenuProps {
   id: string;

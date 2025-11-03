@@ -5,7 +5,7 @@ import { UpdateNameForm } from "@/components/profile/update-name-form";
 import { UpdatePasswordForm } from "@/components/profile/update-password-form";
 import { getUser } from "@/server/server-functions/auth-functions";
 
-export const Route = createFileRoute("/_dashboard/profile")({
+export const Route = createFileRoute("/_dashboard/profile/")({
   component: RouteComponent,
   beforeLoad: () => getUser(),
 });

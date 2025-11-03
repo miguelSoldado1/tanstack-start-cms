@@ -33,7 +33,7 @@ export function UserTable() {
   return (
     <section>
       <DataTable table={table}>
-        <DataTableToolbar table={table} refetch={query.refetch} isLoading={query.isFetching}>
+        <DataTableToolbar isLoading={query.isFetching} refetch={query.refetch} table={table}>
           <DataTableSortList table={table} />
         </DataTableToolbar>
       </DataTable>
