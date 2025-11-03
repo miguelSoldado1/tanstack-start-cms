@@ -52,7 +52,7 @@ export const columns: ColumnDef<typeof product.$inferSelect>[] = [
     cell: ({ getValue }) => formatDate(getValue<Date>()),
     meta: {
       label: "Created date",
-      variant: "date",
+      variant: "dateRange",
     },
     enableSorting: true,
     enableColumnFilter: true,
@@ -64,7 +64,7 @@ export const columns: ColumnDef<typeof product.$inferSelect>[] = [
     cell: ({ getValue }) => formatDate(getValue<Date>()),
     meta: {
       label: "Updated date",
-      variant: "date",
+      variant: "dateRange",
     },
     enableSorting: true,
     enableColumnFilter: true,

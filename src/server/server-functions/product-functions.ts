@@ -23,7 +23,7 @@ const FILTER_COLUMNS = {
 const CONFIG: TableQueryConfig<typeof SORT_COLUMNS, typeof FILTER_COLUMNS> = {
   sortColumns: SORT_COLUMNS,
   filterColumns: FILTER_COLUMNS,
-  dateColumns: new Set(["createdAt", "updatedAt"]),
+  dateRangeColumns: new Set(["createdAt", "updatedAt"]),
   textColumns: new Set(["name", "sku"]),
   rangeColumns: new Set(["price"]),
 } as const;
@@ -53,6 +53,22 @@ export const getTableProducts = createServerFn()
   .inputValidator(getTableDataInput)
   .handler(({ data }) => getTableHandler(data));
 
+const getProductSchema = z.object({ id: z.number().positive() });
+
+async function getFirstHandler(input: z.infer<typeof getProductSchema>) {
+  const [product] = await db.select().from(schema.product).where(eq(schema.product.id, input.id));
+  if (!product) {
+    throw new Error(`Product with id ${input.id} not found`);
+  }
+
+  return product;
+}
+
+export const getProduct = createServerFn()
+  .middleware([authMiddleware])
+  .inputValidator(getProductSchema)
+  .handler(({ data }) => getFirstHandler(data));
+
 const deleteProductSchema = z.object({ id: z.number().positive() });
 
 async function deleteHandler(input: z.infer<typeof deleteProductSchema>) {
@@ -66,10 +82,38 @@ async function deleteHandler(input: z.infer<typeof deleteProductSchema>) {
   }
 
   await db.delete(schema.product).where(eq(schema.product.id, input.id));
-  return { success: true };
 }
 
 export const deleteProduct = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .inputValidator(deleteProductSchema)
   .handler(({ data }) => deleteHandler(data));
+
+const updateProductInput = z.object({
+  id: z.number().positive(),
+  name: z.string().min(2).max(100),
+  description: z.string().min(10).max(1000),
+  sku: z.string().min(2).max(10),
+  price: z.number().min(0.01).multipleOf(0.01),
+});
+
+async function updateHandler(input: z.infer<typeof updateProductInput>) {
+  const [existingProduct] = await db
+    .select({ id: schema.product.id })
+    .from(schema.product)
+    .where(eq(schema.product.id, input.id));
+
+  if (!existingProduct) {
+    throw new Error(`Product with id ${input.id} not found`);
+  }
+
+  await db
+    .update(schema.product)
+    .set({ ...input, price: input.price.toFixed(2), updatedAt: new Date() })
+    .where(eq(schema.product.id, input.id));
+}
+
+export const updateProduct = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .inputValidator(updateProductInput)
+  .handler(({ data }) => updateHandler(data));

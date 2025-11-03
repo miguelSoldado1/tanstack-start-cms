@@ -10,9 +10,12 @@ export interface TableQueryConfig<
   sortColumns: TSortColumns;
   filterColumns: TFilterColumns;
   dateColumns?: Set<string>;
+  dateRangeColumns?: Set<string>;
   textColumns?: Set<string>;
   rangeColumns?: Set<string>;
   numberColumns?: Set<string>;
+  exactColumns?: Set<string>;
+  enumColumns?: Set<string>;
 }
 
 export interface TableQueryInput {
@@ -62,7 +65,14 @@ export function buildFilterConditions<T extends Record<string, PgColumn>>(
   filters: Record<string, string | number | (string | number)[]>,
   config: Pick<
     TableQueryConfig<Record<string, PgColumn>, T>,
-    "filterColumns" | "dateColumns" | "textColumns" | "rangeColumns" | "numberColumns"
+    | "filterColumns"
+    | "dateColumns"
+    | "dateRangeColumns"
+    | "textColumns"
+    | "rangeColumns"
+    | "numberColumns"
+    | "exactColumns"
+    | "enumColumns"
   >
 ): SQL<unknown>[] {
   const whereConditions: SQL<unknown>[] = [];
@@ -89,7 +99,7 @@ export function buildFilterConditions<T extends Record<string, PgColumn>>(
             const date = parseDate(v);
             return date ? gte(column, date) : null;
           })
-          .filter((condition): condition is NonNullable<typeof condition> => condition !== null);
+          .filter((cond): cond is NonNullable<typeof cond> => cond !== null);
         condition = conditions.length > 0 ? or(...conditions)! : null;
       } else {
         const date = parseDate(value);
@@ -99,6 +109,16 @@ export function buildFilterConditions<T extends Record<string, PgColumn>>(
           const endOfDay = new Date(date);
           endOfDay.setHours(23, 59, 59, 999);
           condition = and(gte(column, startOfDay), lte(column, endOfDay))!;
+        }
+      }
+    } else if (config.dateRangeColumns?.has(key)) {
+      // Handle date range columns
+      if (Array.isArray(value) && value.length === 2) {
+        const [min, max] = value.map((v) => parseDate(v)).filter((d): d is Date => d !== null);
+        if (min && max) {
+          const endOfDay = new Date(max);
+          endOfDay.setUTCHours(23, 59, 59, 999);
+          condition = and(gte(column, min), lte(column, endOfDay))!;
         }
       }
     } else if (config.rangeColumns?.has(key)) {
@@ -115,21 +135,36 @@ export function buildFilterConditions<T extends Record<string, PgColumn>>(
           condition = gte(column, numValue);
         }
       }
-    } else {
-      // Handle text columns
+    } else if (config.enumColumns?.has(key)) {
+      // Handle enum columns (exact match)
       if (Array.isArray(value)) {
-        const conditions = value.map((v) => ilike(column, `%${String(v)}%`));
+        const conditions = value.map((v) => eq(column, v));
         condition = conditions.length > 0 ? or(...conditions)! : null;
       } else {
-        const stringValue = String(value);
-        const searchTerms = stringValue.trim().split(/\s+/).filter(Boolean);
-        if (searchTerms.length > 0) {
-          if (searchTerms.length === 1) {
-            condition = ilike(column, `%${searchTerms[0]}%`);
-          } else {
-            const wordConditions = searchTerms.map((term: string) => ilike(column, `%${term}%`));
-            condition = and(...wordConditions)!;
-          }
+        condition = eq(column, value);
+      }
+    } else if (config.exactColumns?.has(key)) {
+      // Handle exact match columns (case-insensitive)
+      if (Array.isArray(value)) {
+        const conditions = value.map((v) => ilike(column, String(v)));
+        condition = conditions.length > 0 ? or(...conditions)! : null;
+      } else {
+        condition = ilike(column, String(value));
+      }
+    } else if (Array.isArray(value)) {
+      // Handle text columns - array case
+      const conditions = value.map((v) => ilike(column, `%${String(v)}%`));
+      condition = conditions.length > 0 ? or(...conditions)! : null;
+    } else {
+      // Handle text columns - single value case
+      const stringValue = String(value);
+      const searchTerms = stringValue.trim().split(/\s+/).filter(Boolean);
+      if (searchTerms.length > 0) {
+        if (searchTerms.length === 1) {
+          condition = ilike(column, `%${searchTerms[0]}%`);
+        } else {
+          const wordConditions = searchTerms.map((term: string) => ilike(column, `%${term}%`));
+          condition = and(...wordConditions)!;
         }
       }
     }
