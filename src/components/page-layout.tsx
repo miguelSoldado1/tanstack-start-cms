@@ -10,19 +10,20 @@ export function PageLayout({ children }: PageLayoutProps) {
   return <main className="flex-1 space-y-4 p-4 pt-6 md:px-6 md:py-8">{children}</main>;
 }
 
-interface PageHeaderProps extends LinkProps {
+interface PageHeaderProps {
   title: string;
   description?: string;
   children?: React.ReactNode;
+  backUrl?: LinkProps["to"];
 }
 
-export function PageHeader({ title, description, children, ...linkProps }: PageHeaderProps) {
+export function PageHeader({ title, description, children, backUrl }: PageHeaderProps) {
   return (
     <section className="flex items-center justify-between py-2">
       <div className="flex items-center space-x-4">
-        {linkProps.to && (
+        {backUrl && (
           <Button asChild size="icon" variant="ghost">
-            <Link {...linkProps}>
+            <Link to={backUrl}>
               <ChevronLeftIcon className="size-8" />
             </Link>
           </Button>
