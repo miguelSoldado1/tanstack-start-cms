@@ -4,15 +4,17 @@ import { PageHeader, PageLayout } from "@/components/page-layout";
 import { DeleteProductButton } from "@/components/product/delete-product-button";
 import { ProductEditForm } from "@/components/product/product-edit-form";
 import { PublishProductButton } from "@/components/product/publish-product-button";
+import { getUser } from "@/server/server-functions/auth-functions";
 
 export const Route = createFileRoute("/_dashboard/product/edit/$id")({
   component: RouteComponent,
-  beforeLoad: ({ params }) => {
+  beforeLoad: async ({ params }) => {
     const parsedProductId = z.coerce.number().positive().safeParse(params.id);
     if (!parsedProductId.success) {
       throw redirect({ to: "/product" });
     }
 
+    await getUser();
     return { productId: parsedProductId.data };
   },
 });

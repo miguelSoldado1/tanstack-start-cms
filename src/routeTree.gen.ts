@@ -18,6 +18,7 @@ import { Route as DashboardUserIndexRouteImport } from './routes/_dashboard/user
 import { Route as DashboardProfileIndexRouteImport } from './routes/_dashboard/profile/index'
 import { Route as DashboardProductIndexRouteImport } from './routes/_dashboard/product/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
+import { Route as DashboardProductCreateRouteImport } from './routes/_dashboard/product/create'
 import { Route as DashboardProductEditIdRouteImport } from './routes/_dashboard/product/edit.$id'
 
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
@@ -64,6 +65,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardProductCreateRoute = DashboardProductCreateRouteImport.update({
+  id: '/product/create',
+  path: '/product/create',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const DashboardProductEditIdRoute = DashboardProductEditIdRouteImport.update({
   id: '/product/edit/$id',
   path: '/product/edit/$id',
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof AuthSignInRoute
   '/sign-up': typeof AuthSignUpRoute
   '/api/upload': typeof ApiUploadRoute
+  '/product/create': typeof DashboardProductCreateRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/product': typeof DashboardProductIndexRoute
   '/profile': typeof DashboardProfileIndexRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByTo {
   '/sign-in': typeof AuthSignInRoute
   '/sign-up': typeof AuthSignUpRoute
   '/api/upload': typeof ApiUploadRoute
+  '/product/create': typeof DashboardProductCreateRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/product': typeof DashboardProductIndexRoute
   '/profile': typeof DashboardProfileIndexRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   '/_auth/sign-in': typeof AuthSignInRoute
   '/_auth/sign-up': typeof AuthSignUpRoute
   '/api/upload': typeof ApiUploadRoute
+  '/_dashboard/product/create': typeof DashboardProductCreateRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_dashboard/product/': typeof DashboardProductIndexRoute
   '/_dashboard/profile/': typeof DashboardProfileIndexRoute
@@ -112,6 +121,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/api/upload'
+    | '/product/create'
     | '/api/auth/$'
     | '/product'
     | '/profile'
@@ -123,6 +133,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/api/upload'
+    | '/product/create'
     | '/api/auth/$'
     | '/product'
     | '/profile'
@@ -135,6 +146,7 @@ export interface FileRouteTypes {
     | '/_auth/sign-in'
     | '/_auth/sign-up'
     | '/api/upload'
+    | '/_dashboard/product/create'
     | '/api/auth/$'
     | '/_dashboard/product/'
     | '/_dashboard/profile/'
@@ -216,6 +228,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_dashboard/product/create': {
+      id: '/_dashboard/product/create'
+      path: '/product/create'
+      fullPath: '/product/create'
+      preLoaderRoute: typeof DashboardProductCreateRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/_dashboard/product/edit/$id': {
       id: '/_dashboard/product/edit/$id'
       path: '/product/edit/$id'
@@ -227,6 +246,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface DashboardRouteRouteChildren {
+  DashboardProductCreateRoute: typeof DashboardProductCreateRoute
   DashboardProductIndexRoute: typeof DashboardProductIndexRoute
   DashboardProfileIndexRoute: typeof DashboardProfileIndexRoute
   DashboardUserIndexRoute: typeof DashboardUserIndexRoute
@@ -234,6 +254,7 @@ interface DashboardRouteRouteChildren {
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardProductCreateRoute: DashboardProductCreateRoute,
   DashboardProductIndexRoute: DashboardProductIndexRoute,
   DashboardProfileIndexRoute: DashboardProfileIndexRoute,
   DashboardUserIndexRoute: DashboardUserIndexRoute,

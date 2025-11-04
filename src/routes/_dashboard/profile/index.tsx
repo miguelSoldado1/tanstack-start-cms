@@ -11,14 +11,13 @@ export const Route = createFileRoute("/_dashboard/profile/")({
 });
 
 const TITLE = "Profile";
-const DESCRIPTION =
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris a lectus consequat, sollicitudin elit eu, dapibus augue. Duis luctus eros velit, in posuere diam egestas sit amet.";
+const DESCRIPTION = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur gravida dignissim scelerisque.";
 
 function RouteComponent() {
   return (
     <PageLayout>
       <PageHeader description={DESCRIPTION} title={TITLE} />
-      <section className="container space-y-6 rounded-xl border p-6">
+      <section className="container space-y-6 rounded-xl p-6">
         <UpdateNameForm />
         <UpdatePasswordForm />
         <DeleteAccountForm />

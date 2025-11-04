@@ -1,21 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { UserTable } from "@/components/auth/user/user-table";
 import { PageHeader, PageLayout } from "@/components/page-layout";
+import { ProductCreateForm } from "@/components/product/product-create-form";
 import { getUser } from "@/server/server-functions/auth-functions";
 
-export const Route = createFileRoute("/_dashboard/user/")({
+export const Route = createFileRoute("/_dashboard/product/create")({
   component: RouteComponent,
   beforeLoad: () => getUser(),
 });
 
-const TITLE = "Users";
+const TITLE = "Create Product";
 const DESCRIPTION = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur gravida dignissim scelerisque.";
 
 function RouteComponent() {
   return (
     <PageLayout>
-      <PageHeader description={DESCRIPTION} title={TITLE} />
-      <UserTable />
+      <PageHeader backUrl="/product" description={DESCRIPTION} title={TITLE} />
+      <ProductCreateForm />
     </PageLayout>
   );
 }
