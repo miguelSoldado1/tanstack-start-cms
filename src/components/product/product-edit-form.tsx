@@ -10,6 +10,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { getProduct, updateProduct } from "@/server/server-functions/product-functions";
 import { tryCatch } from "@/try-catch";
+import { ProductCategoryTable } from "./product-category/product-category-table";
+import { ProductMultimedia } from "./product-multimedia/product-multimedia";
 // import { ProductMultimedia } from "./product-multimedia/product-multimedia";
 import { RecordInfoForm } from "./record-info-form";
 import type z from "zod";
@@ -68,11 +70,15 @@ export function ProductEditForm({ id }: ProductEditFormProps) {
         </AccordionItem>
         <AccordionItem className="mb-4 rounded-lg border" value="product-multimedia">
           <AccordionTrigger className="px-4 py-3">Product Multimedia</AccordionTrigger>
-          <AccordionContent className="my-1 px-4 pb-4">{/* <ProductMultimedia productId={id} /> */}</AccordionContent>
+          <AccordionContent className="my-1 px-4 pb-4">
+            <ProductMultimedia productId={id} />
+          </AccordionContent>
         </AccordionItem>
         <AccordionItem className="mb-4 rounded-lg border" value="product-categories">
           <AccordionTrigger className="px-4 py-3">Product Categories</AccordionTrigger>
-          <AccordionContent className="my-1 px-4 pb-4">{/* <ProductCategoryTable productId={id} /> */}</AccordionContent>
+          <AccordionContent className="my-1 px-4 pb-4">
+            <ProductCategoryTable productId={id} />
+          </AccordionContent>
         </AccordionItem>
       </Accordion>
       <div className="flex justify-end gap-2">

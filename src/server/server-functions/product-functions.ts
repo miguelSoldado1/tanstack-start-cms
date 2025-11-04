@@ -117,3 +117,80 @@ export const updateProduct = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .inputValidator(updateProductInput)
   .handler(({ data }) => updateHandler(data));
+
+const createProductInput = z.object({
+  name: z.string().min(2).max(100),
+  description: z.string().min(10).max(1000),
+  sku: z.string().min(2).max(10),
+  price: z.number().min(0.01).multipleOf(0.01),
+});
+
+async function createHandler(input: z.infer<typeof createProductInput>) {
+  try {
+    const [product] = await db
+      .insert(schema.product)
+      .values({ ...input, price: input.price.toFixed(2) })
+      .returning({ id: schema.product.id });
+
+    return product.id;
+  } catch (error) {
+    throw new Error("Failed to create product", { cause: error });
+  }
+}
+
+export const createProduct = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .inputValidator(createProductInput)
+  .handler(({ data }) => createHandler(data));
+
+const publishProductSchema = z.object({
+  id: z.number().positive(),
+});
+
+async function publishHandler(input: z.infer<typeof publishProductSchema>) {
+  try {
+    const [existingProduct] = await db
+      .select({ id: schema.product.id })
+      .from(schema.product)
+      .where(eq(schema.product.id, input.id));
+
+    if (!existingProduct) {
+      throw new Error(`Product with id ${input.id} not found`);
+    }
+
+    await db.update(schema.product).set({ published: true, updatedAt: new Date() }).where(eq(schema.product.id, input.id));
+  } catch (error) {
+    throw new Error("Failed to publish product", { cause: error });
+  }
+}
+
+export const publishProduct = createServerFn()
+  .middleware([authMiddleware])
+  .inputValidator(publishProductSchema)
+  .handler(({ data }) => publishHandler(data));
+
+const unpublishProductSchema = z.object({
+  id: z.number().positive(),
+});
+
+async function unpublishHandler(input: z.infer<typeof unpublishProductSchema>) {
+  try {
+    const [existingProduct] = await db
+      .select({ id: schema.product.id })
+      .from(schema.product)
+      .where(eq(schema.product.id, input.id));
+
+    if (!existingProduct) {
+      throw new Error(`Product with id ${input.id} not found`);
+    }
+
+    await db.update(schema.product).set({ published: false, updatedAt: new Date() }).where(eq(schema.product.id, input.id));
+  } catch (error) {
+    throw new Error("Failed to unpublish product", { cause: error });
+  }
+}
+
+export const unpublishProduct = createServerFn()
+  .middleware([authMiddleware])
+  .inputValidator(unpublishProductSchema)
+  .handler(({ data }) => unpublishHandler(data));

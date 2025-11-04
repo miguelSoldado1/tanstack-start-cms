@@ -8,10 +8,9 @@ import { getTableProducts } from "@/server/server-functions/product-functions";
 import { columns } from "./product-columns";
 
 export function ProductTable() {
-  const getTable = useServerFn(getTableProducts);
-
+  const getTableFn = useServerFn(getTableProducts);
   const { table, query } = useQueryTable({
-    queryOptions: (params) => ({ queryKey: ["products", params], queryFn: () => getTable({ data: params }) }),
+    queryOptions: (params) => ({ queryKey: ["products", params], queryFn: () => getTableFn({ data: params }) }),
     initialState: { sorting: [{ id: "createdAt", desc: true }], columnPinning: { right: ["actions"] } },
     columns,
   });

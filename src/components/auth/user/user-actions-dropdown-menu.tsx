@@ -20,6 +20,8 @@ interface UserActionsDropdownMenuProps {
 export function UserActionsDropdownMenu({ id }: UserActionsDropdownMenuProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const { data: session } = authClient.useSession();
+
   const queryClient = useQueryClient();
 
   function deleteUser(userId: string) {
@@ -38,7 +40,7 @@ export function UserActionsDropdownMenu({ id }: UserActionsDropdownMenuProps) {
 
   function changeUserRole(userId: string, role: "admin" | "read" | "write") {
     startTransition(async () => {
-      if (userId === id) {
+      if (userId === session?.user.id) {
         toast.error("You cannot change your own role");
         return;
       }
