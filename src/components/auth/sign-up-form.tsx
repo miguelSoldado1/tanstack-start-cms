@@ -13,6 +13,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { authClient } from "@/lib/auth/auth-client";
 import { AuthHeader, AuthHeaderDescription, AuthHeaderTitle } from "./auth-header";
 import { AuthSocialProviders } from "./auth-social-providers";
+import { LastUsedBadge } from "./last-used-badge";
 
 const DISABLE_SIGN_UP_WITH_EMAIL = true;
 
@@ -97,6 +98,7 @@ export function SignUpForm() {
           <Button disabled={isFormSubmitting || DISABLE_SIGN_UP_WITH_EMAIL} type="submit">
             Sign up with Email
           </Button>
+          {lastMethod === "email" && <LastUsedBadge />}
         </form>
       </Form>
       <FieldSeparator>Or</FieldSeparator>
