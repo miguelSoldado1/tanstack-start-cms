@@ -14,6 +14,8 @@ import { authClient } from "@/lib/auth/auth-client";
 import { AuthHeader, AuthHeaderDescription, AuthHeaderTitle } from "./auth-header";
 import { AuthSocialProviders } from "./auth-social-providers";
 
+const DISABLE_SIGN_UP_WITH_EMAIL = true;
+
 const formSchema = z.object({
   email: z.email(),
   name: z.string().min(4).max(64),
@@ -27,6 +29,8 @@ export function SignUpForm() {
     resolver: zodResolver(formSchema),
     defaultValues: { email: "", name: "", password: "" },
   });
+
+  const lastMethod = authClient.getLastUsedLoginMethod();
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     const { error } = await authClient.signUp.email(data);
@@ -54,7 +58,12 @@ export function SignUpForm() {
             name="email"
             render={({ field }) => (
               <FormItemWrapper label="Email">
-                <Input {...field} disabled={isFormSubmitting} placeholder="email@acme.com" type="email" />
+                <Input
+                  {...field}
+                  disabled={isFormSubmitting || DISABLE_SIGN_UP_WITH_EMAIL}
+                  placeholder="email@acme.com"
+                  type="email"
+                />
               </FormItemWrapper>
             )}
           />
@@ -63,7 +72,12 @@ export function SignUpForm() {
             name="name"
             render={({ field }) => (
               <FormItemWrapper label="Name">
-                <Input {...field} disabled={isFormSubmitting} placeholder="John Doe" type="text" />
+                <Input
+                  {...field}
+                  disabled={isFormSubmitting || DISABLE_SIGN_UP_WITH_EMAIL}
+                  placeholder="John Doe"
+                  type="text"
+                />
               </FormItemWrapper>
             )}
           />
@@ -72,17 +86,21 @@ export function SignUpForm() {
             name="password"
             render={({ field }) => (
               <FormItemWrapper label="Password">
-                <PasswordInput {...field} disabled={isFormSubmitting} placeholder="***********" />
+                <PasswordInput
+                  {...field}
+                  disabled={isFormSubmitting || DISABLE_SIGN_UP_WITH_EMAIL}
+                  placeholder="***********"
+                />
               </FormItemWrapper>
             )}
           />
-          <Button disabled={isFormSubmitting} type="submit">
+          <Button disabled={isFormSubmitting || DISABLE_SIGN_UP_WITH_EMAIL} type="submit">
             Sign up with Email
           </Button>
         </form>
       </Form>
       <FieldSeparator>Or</FieldSeparator>
-      <AuthSocialProviders isLoading={isSigningUp} setIsLoading={setIsSigningUp} />
+      <AuthSocialProviders isLoading={isSigningUp} lastMethod={lastMethod} setIsLoading={setIsSigningUp} />
       <FieldDescription className="text-center">
         Already have an account? <Link to="/sign-in">Sign in</Link>
       </FieldDescription>
