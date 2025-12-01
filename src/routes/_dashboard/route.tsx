@@ -1,7 +1,8 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { PackageOpenIcon, UsersRoundIcon } from "lucide-react";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { getUser } from "@/server/server-functions/auth-functions";
 import type { NavigationItem } from "@/components/sidebar/nav-main";
 
 const navigationData: NavigationItem[] = [
@@ -11,6 +12,12 @@ const navigationData: NavigationItem[] = [
 
 export const Route = createFileRoute("/_dashboard")({
   component: RouteComponent,
+  beforeLoad: async () => {
+    const user = await getUser();
+    if (!user) {
+      throw redirect({ to: "/sign-in" });
+    }
+  },
 });
 
 function RouteComponent() {
