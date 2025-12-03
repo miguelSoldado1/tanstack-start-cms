@@ -1,3 +1,4 @@
+import { ScriptOnce } from "@tanstack/react-router";
 import { createContext, useContext, useEffect, useState } from "react";
 
 type Theme = "dark" | "light" | "system";
@@ -34,6 +35,20 @@ const initialState: ThemeProviderState = {
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
+const initialThemeScript = `(() => {
+  try {
+    const storageKey = "vite-ui-theme";
+    const storedTheme = window.localStorage.getItem(storageKey);
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const resolvedTheme = storedTheme === "light" || storedTheme === "dark" ? storedTheme : prefersDark ? "dark" : "light";
+    const root = document.documentElement;
+    root.classList.remove("light", "dark");
+    root.classList.add(resolvedTheme);
+  } catch (_) {
+    /* no-op */
+  }
+})()`;
+
 export function ThemeProvider({
   children,
   defaultTheme = "system",
@@ -66,6 +81,7 @@ export function ThemeProvider({
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>
+      <ScriptOnce>{initialThemeScript}</ScriptOnce>
       {children}
     </ThemeProviderContext.Provider>
   );

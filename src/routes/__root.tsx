@@ -7,20 +7,6 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import appCss from "../styles.css?url";
 
-const initialThemeScript = `(() => {
-  try {
-    const storageKey = "vite-ui-theme";
-    const storedTheme = window.localStorage.getItem(storageKey);
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const resolvedTheme = storedTheme === "light" || storedTheme === "dark" ? storedTheme : prefersDark ? "dark" : "light";
-    const root = document.documentElement;
-    root.classList.remove("light", "dark");
-    root.classList.add(resolvedTheme);
-  } catch (_) {
-    /* no-op */
-  }
-})()`;
-
 export const Route = createRootRoute({
   head: () => ({
     meta: [
@@ -38,29 +24,24 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
-        <script
-          dangerouslySetInnerHTML={{ __html: initialThemeScript }}
-          data-initial-theme="true"
-          suppressHydrationWarning
-        />
       </head>
       <body>
         <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
           <NuqsAdapter>{children}</NuqsAdapter>
+          {process.env.VERCEL_ENV !== "production" && (
+            <TanStackDevtools
+              config={{
+                position: "bottom-right",
+              }}
+              plugins={[
+                { name: "Tanstack Router", render: <TanStackRouterDevtoolsPanel /> },
+                { name: "Tanstack Query", render: <ReactQueryDevtoolsPanel /> },
+              ]}
+            />
+          )}
+          <Toaster />
         </ThemeProvider>
-        {process.env.VERCEL_ENV !== "production" && (
-          <TanStackDevtools
-            config={{
-              position: "bottom-right",
-            }}
-            plugins={[
-              { name: "Tanstack Router", render: <TanStackRouterDevtoolsPanel /> },
-              { name: "Tanstack Query", render: <ReactQueryDevtoolsPanel /> },
-            ]}
-          />
-        )}
         <Scripts />
-        <Toaster />
       </body>
     </html>
   );
