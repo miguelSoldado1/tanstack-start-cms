@@ -48,15 +48,17 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
           <NuqsAdapter>{children}</NuqsAdapter>
         </ThemeProvider>
-        <TanStackDevtools
-          config={{
-            position: "bottom-right",
-          }}
-          plugins={[
-            { name: "Tanstack Router", render: <TanStackRouterDevtoolsPanel /> },
-            { name: "Tanstack Query", render: <ReactQueryDevtoolsPanel /> },
-          ]}
-        />
+        {process.env.VERCEL_ENV !== "production" && (
+          <TanStackDevtools
+            config={{
+              position: "bottom-right",
+            }}
+            plugins={[
+              { name: "Tanstack Router", render: <TanStackRouterDevtoolsPanel /> },
+              { name: "Tanstack Query", render: <ReactQueryDevtoolsPanel /> },
+            ]}
+          />
+        )}
         <Scripts />
         <Toaster />
       </body>
