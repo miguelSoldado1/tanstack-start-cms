@@ -42,6 +42,27 @@ export const productCategoryRelations = relations(productCategory, ({ one }) => 
   category: one(category, { fields: [productCategory.categoryId], references: [category.id] }),
 }));
 
+export const productBundle = pgTable(
+  "product_bundle",
+  {
+    id: serial("id").primaryKey(),
+    primaryProductId: integer("primary_product_id")
+      .references(() => product.id, { onDelete: "cascade" })
+      .notNull(),
+    bundledProductId: integer("bundled_product_id")
+      .references(() => product.id, { onDelete: "cascade" })
+      .notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.primaryProductId, t.bundledProductId)]
+);
+
+export const productBundleRelations = relations(productBundle, ({ one }) => ({
+  primaryProduct: one(product, { fields: [productBundle.primaryProductId], references: [product.id] }),
+  bundledProduct: one(product, { fields: [productBundle.bundledProductId], references: [product.id] }),
+}));
+
 export const productMultimedia = pgTable("product_multimedia", {
   id: serial("id").primaryKey(),
   productId: integer("product_id")
