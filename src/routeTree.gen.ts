@@ -17,6 +17,7 @@ import { Route as AuthSignInRouteImport } from './routes/_auth/sign-in'
 import { Route as DashboardUserIndexRouteImport } from './routes/_dashboard/user/index'
 import { Route as DashboardProfileIndexRouteImport } from './routes/_dashboard/profile/index'
 import { Route as DashboardProductIndexRouteImport } from './routes/_dashboard/product/index'
+import { Route as DashboardCategoryIndexRouteImport } from './routes/_dashboard/category/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as DashboardProductCreateRouteImport } from './routes/_dashboard/product/create'
 import { Route as DashboardProductEditIdRouteImport } from './routes/_dashboard/product/edit.$id'
@@ -60,6 +61,11 @@ const DashboardProductIndexRoute = DashboardProductIndexRouteImport.update({
   path: '/product/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardCategoryIndexRoute = DashboardCategoryIndexRouteImport.update({
+  id: '/category/',
+  path: '/category/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/api/upload': typeof ApiUploadRoute
   '/product/create': typeof DashboardProductCreateRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/category': typeof DashboardCategoryIndexRoute
   '/product': typeof DashboardProductIndexRoute
   '/profile': typeof DashboardProfileIndexRoute
   '/user': typeof DashboardUserIndexRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/api/upload': typeof ApiUploadRoute
   '/product/create': typeof DashboardProductCreateRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/category': typeof DashboardCategoryIndexRoute
   '/product': typeof DashboardProductIndexRoute
   '/profile': typeof DashboardProfileIndexRoute
   '/user': typeof DashboardUserIndexRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/api/upload': typeof ApiUploadRoute
   '/_dashboard/product/create': typeof DashboardProductCreateRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_dashboard/category/': typeof DashboardCategoryIndexRoute
   '/_dashboard/product/': typeof DashboardProductIndexRoute
   '/_dashboard/profile/': typeof DashboardProfileIndexRoute
   '/_dashboard/user/': typeof DashboardUserIndexRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/api/upload'
     | '/product/create'
     | '/api/auth/$'
+    | '/category'
     | '/product'
     | '/profile'
     | '/user'
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
     | '/api/upload'
     | '/product/create'
     | '/api/auth/$'
+    | '/category'
     | '/product'
     | '/profile'
     | '/user'
@@ -148,6 +159,7 @@ export interface FileRouteTypes {
     | '/api/upload'
     | '/_dashboard/product/create'
     | '/api/auth/$'
+    | '/_dashboard/category/'
     | '/_dashboard/product/'
     | '/_dashboard/profile/'
     | '/_dashboard/user/'
@@ -221,6 +233,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProductIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/_dashboard/category/': {
+      id: '/_dashboard/category/'
+      path: '/category'
+      fullPath: '/category'
+      preLoaderRoute: typeof DashboardCategoryIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -247,6 +266,7 @@ declare module '@tanstack/react-router' {
 
 interface DashboardRouteRouteChildren {
   DashboardProductCreateRoute: typeof DashboardProductCreateRoute
+  DashboardCategoryIndexRoute: typeof DashboardCategoryIndexRoute
   DashboardProductIndexRoute: typeof DashboardProductIndexRoute
   DashboardProfileIndexRoute: typeof DashboardProfileIndexRoute
   DashboardUserIndexRoute: typeof DashboardUserIndexRoute
@@ -255,6 +275,7 @@ interface DashboardRouteRouteChildren {
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardProductCreateRoute: DashboardProductCreateRoute,
+  DashboardCategoryIndexRoute: DashboardCategoryIndexRoute,
   DashboardProductIndexRoute: DashboardProductIndexRoute,
   DashboardProfileIndexRoute: DashboardProfileIndexRoute,
   DashboardUserIndexRoute: DashboardUserIndexRoute,
