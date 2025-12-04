@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { ProductBundleTable } from "@/components/bundle/product-bundle-table";
 import { PageHeader, PageLayout } from "@/components/page-layout";
 
 export const Route = createFileRoute("/_dashboard/bundle/")({
@@ -12,6 +13,7 @@ function RouteComponent() {
   return (
     <PageLayout>
       <PageHeader description={DESCRIPTION} title={TITLE} />
+      <ProductBundleTable />
     </PageLayout>
   );
 }
