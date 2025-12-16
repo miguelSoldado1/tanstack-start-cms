@@ -85,11 +85,23 @@ export function buildFilterConditions<T extends Record<string, PgColumn>>(
 
     // Check if it's a number column
     if (config.numberColumns?.has(key)) {
-      if (Array.isArray(value)) {
-        const conditions = value.map((v) => eq(column, v));
-        condition = conditions.length > 0 ? or(...conditions)! : null;
-      } else {
-        condition = eq(column, value);
+      const numericValues = Array.isArray(value)
+        ? value.map((v) => (typeof v === "number" ? v : Number.parseInt(String(v), 10))).filter((v) => Number.isFinite(v))
+        : typeof value === "string"
+          ? value
+              .split(/[^\d]+/)
+              .filter(Boolean)
+              .map((part) => Number.parseInt(part, 10))
+              .filter((v) => Number.isFinite(v))
+          : Number.isFinite(value)
+            ? [value]
+            : [];
+
+      if (numericValues.length === 1) {
+        condition = eq(column, numericValues[0]);
+      } else if (numericValues.length > 1) {
+        const conditions = numericValues.map((v) => eq(column, v));
+        condition = or(...conditions)!;
       }
     } else if (config.dateColumns?.has(key)) {
       // Handle date columns

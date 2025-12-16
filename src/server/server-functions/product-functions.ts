@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { count, eq } from "drizzle-orm";
+import { countDistinct, eq, getTableColumns, sql } from "drizzle-orm";
 import z from "zod";
 import { authMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
@@ -18,14 +18,16 @@ const FILTER_COLUMNS = {
   price: schema.product.price,
   createdAt: schema.product.createdAt,
   updatedAt: schema.product.updatedAt,
+  category: schema.category.id,
 } as const;
 
 const CONFIG: TableQueryConfig<typeof SORT_COLUMNS, typeof FILTER_COLUMNS> = {
   sortColumns: SORT_COLUMNS,
   filterColumns: FILTER_COLUMNS,
   dateRangeColumns: new Set(["createdAt", "updatedAt"]),
-  textColumns: new Set(["name", "sku"]),
+  textColumns: new Set(["name", "sku", "id"]),
   rangeColumns: new Set(["price"]),
+  numberColumns: new Set(["category"]),
 } as const;
 
 async function getTableHandler(input: z.infer<typeof getTableDataInput>) {
@@ -33,13 +35,30 @@ async function getTableHandler(input: z.infer<typeof getTableDataInput>) {
   const queryParams = buildQueryParams(input, CONFIG);
 
   // Build queries
-  const baseQuery = db.select().from(schema.product);
+  const baseQuery = db
+    .select({
+      ...getTableColumns(schema.product),
+      category: sql<string | null>`string_agg(DISTINCT ${schema.category.name}, ', ')`,
+    })
+    .from(schema.product)
+    .leftJoin(schema.productCategory, eq(schema.productCategory.productId, schema.product.id))
+    .leftJoin(schema.category, eq(schema.productCategory.categoryId, schema.category.id))
+    .groupBy(schema.product.id);
+
   const filterQuery = queryParams.whereClause ? baseQuery.where(queryParams.whereClause) : baseQuery;
   const sortedQuery = queryParams.orderBy.length > 0 ? filterQuery.orderBy(...queryParams.orderBy) : filterQuery;
 
+  const countQueryBase = db
+    .select({ count: countDistinct(schema.product.id) })
+    .from(schema.product)
+    .leftJoin(schema.productCategory, eq(schema.productCategory.productId, schema.product.id))
+    .leftJoin(schema.category, eq(schema.productCategory.categoryId, schema.category.id));
+
+  const totalCountQuery = queryParams.whereClause ? countQueryBase.where(queryParams.whereClause) : countQueryBase;
+
   const [data, totalCount] = await Promise.all([
     sortedQuery.limit(queryParams.limit).offset(queryParams.offset),
-    db.select({ count: count() }).from(schema.product).where(queryParams.whereClause),
+    totalCountQuery,
   ]);
 
   return {

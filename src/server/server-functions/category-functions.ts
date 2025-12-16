@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { count, eq, sql } from "drizzle-orm";
+import { count, eq, ilike, sql } from "drizzle-orm";
 import z from "zod";
 import { authMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
@@ -51,19 +51,31 @@ export const getTableCategories = createServerFn()
   .inputValidator(getTableDataInput)
   .handler(({ data }) => getTableHandler(data));
 
-async function getSelectCategoriesHandler() {
-  const categories = await db
+const selectCategoryInput = z.object({
+  search: z.string().optional(),
+});
+
+async function getSelectCategoriesHandler(input: z.infer<typeof selectCategoryInput>) {
+  const search = input.search?.trim();
+
+  const baseQuery = db
     .select({
       value: sql<string>`cast(${schema.category.id} as text)`,
       label: schema.category.name,
     })
-    .from(schema.category)
-    .orderBy(schema.category.name);
+    .from(schema.category);
+
+  const filteredQuery = search ? baseQuery.where(ilike(schema.category.name, `%${search}%`)) : baseQuery;
+
+  const categories = await filteredQuery.orderBy(schema.category.name);
 
   return categories;
 }
 
-export const getSelectCategories = createServerFn().middleware([authMiddleware]).handler(getSelectCategoriesHandler);
+export const getSelectCategories = createServerFn()
+  .middleware([authMiddleware])
+  .inputValidator(selectCategoryInput)
+  .handler(({ data }) => getSelectCategoriesHandler(data));
 
 const getCategorySchema = z.object({ id: z.number().positive() });
 

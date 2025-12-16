@@ -21,14 +21,20 @@ interface DataTableFacetedFilterProps<TData, TValue> {
   column?: Column<TData, TValue>;
   title?: string;
   options: Option[];
+  selectedOptions?: Option[];
   multiple?: boolean;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
 }
 
 export function DataTableFacetedFilter<TData, TValue>({
   column,
   title,
   options,
+  selectedOptions,
   multiple,
+  searchValue,
+  onSearchChange,
 }: DataTableFacetedFilterProps<TData, TValue>) {
   const [open, setOpen] = React.useState(false);
 
@@ -37,6 +43,11 @@ export function DataTableFacetedFilter<TData, TValue>({
     () => new Set(Array.isArray(columnFilterValue) ? columnFilterValue : []),
     [columnFilterValue]
   );
+
+  const displayOptions = React.useMemo(() => {
+    if (selectedOptions && selectedOptions.length > 0) return selectedOptions;
+    return options;
+  }, [options, selectedOptions]);
 
   const onItemSelect = React.useCallback(
     (option: Option, isSelected: boolean) => {
@@ -97,7 +108,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                     {selectedValues.size} selected
                   </Badge>
                 ) : (
-                  options
+                  displayOptions
                     .filter((option) => selectedValues.has(option.value))
                     .map((option) => (
                       <Badge className="rounded-sm px-1 font-normal" key={option.value} variant="secondary">
@@ -110,12 +121,12 @@ export function DataTableFacetedFilter<TData, TValue>({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-[12.5rem] p-0">
+      <PopoverContent align="start" className="w-50 p-0">
         <Command>
-          <CommandInput placeholder={title} />
+          <CommandInput onValueChange={onSearchChange} placeholder={title} value={searchValue} />
           <CommandList className="max-h-full">
             <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup className="max-h-[18.75rem] overflow-y-auto overflow-x-hidden">
+            <CommandGroup className="max-h-75 overflow-y-auto overflow-x-hidden">
               {options.map((option) => {
                 const isSelected = selectedValues.has(option.value);
 

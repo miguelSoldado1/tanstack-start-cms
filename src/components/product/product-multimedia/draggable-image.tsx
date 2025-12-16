@@ -54,7 +54,7 @@ export function DraggableImage({ productImage, invalidate }: DraggableImageProps
       >
         <Trash2Icon className="size-4" />
       </Button>
-      {/** biome-ignore lint/correctness/useImageSize: <explanation> */}
+      {/** biome-ignore lint/correctness/useImageSize: external image without intrinsic size metadata */}
       <img alt="" className="object-cover" src={productImage.url} />
       <DeleteConfirmationDialog
         isPending={mutation.isPending}

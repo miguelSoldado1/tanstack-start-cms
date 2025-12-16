@@ -9,6 +9,7 @@ declare module "@tanstack/react-table" {
     placeholder?: string;
     variant?: FilterVariant;
     options?: Option[];
+    asyncOptions?: AsyncOptionsConfig;
     range?: [number, number];
     unit?: string;
     icon?: React.FC<React.SVGProps<SVGSVGElement>>;
@@ -20,6 +21,12 @@ export interface Option {
   value: string;
   count?: number;
   icon?: React.FC<React.SVGProps<SVGSVGElement>>;
+}
+
+export interface AsyncOptionsConfig {
+  queryKey: string;
+  queryFn: (input: { search?: string }) => Promise<Option[]>;
+  debounceMs?: number;
 }
 
 export type FilterOperator = DataTableConfig["operators"][number];

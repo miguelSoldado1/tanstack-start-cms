@@ -45,7 +45,7 @@ export function AddProductCategory({ productId, existingCategories }: AddProduct
   const getSelectCategoriesFn = useServerFn(getSelectCategories);
   const query = useQuery({
     queryKey: ["categories"],
-    queryFn: getSelectCategoriesFn,
+    queryFn: () => getSelectCategoriesFn({ data: {} }),
   });
 
   const mutation = useMutation({ mutationFn: useServerFn(createProductCategory) });

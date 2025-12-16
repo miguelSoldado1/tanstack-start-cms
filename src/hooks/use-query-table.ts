@@ -58,7 +58,10 @@ function computeColumnIds<T>(columns: ColumnDef<T>[]) {
 
 function buildFilterParsers<T>(filterableColumns: ColumnDef<T>[]) {
   return filterableColumns.reduce<Record<string, Parser<string> | Parser<string[]>>>((acc, column) => {
-    if (column.meta?.options) {
+    const variant = column.meta?.variant;
+    const isMulti = variant === "multiSelect" || variant === "asyncMultiSelect";
+
+    if (column.meta?.options || isMulti) {
       acc[column.id ?? ""] = parseAsArrayOf(parseAsString, ARRAY_SEPARATOR).withOptions({ shallow: true });
     } else {
       acc[column.id ?? ""] = parseAsString.withOptions({ shallow: true });

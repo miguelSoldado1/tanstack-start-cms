@@ -19,9 +19,9 @@ export function ProductTable() {
     return (
       <section>
         <DataTableSkeleton
-          cellWidths={["5rem", "15rem", "8rem", "8rem"]}
-          columnCount={4}
-          filterCount={3}
+          cellWidths={["5rem", "12rem", "8rem", "10rem", "8rem"]}
+          columnCount={5}
+          filterCount={4}
           rowCount={10}
           shrinkZero
         />

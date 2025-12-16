@@ -52,7 +52,7 @@ export function DragAndDropMedia({ items, setItems, invalidate }: DragAndDropMed
             <div className="absolute top-2 left-2 z-10 select-none rounded-md bg-secondary px-2 py-1 font-semibold text-secondary-foreground text-xs">
               {activeItem.order}
             </div>
-            {/** biome-ignore lint/correctness/useImageSize: <explanation> */}
+            {/** biome-ignore lint/correctness/useImageSize: external image without intrinsic size metadata */}
             <img alt="" className="object-cover" src={activeItem.url} />
           </div>
         ) : null}
