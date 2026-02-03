@@ -88,7 +88,7 @@ export function AddProductCategory({ productId, existingCategories }: AddProduct
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent avoidCollisions={false} className="max-h-60" side="bottom">
                       {query.data?.map((option) => (
                         <SelectItem
                           disabled={existingCategories.includes(Number(option.value))}
