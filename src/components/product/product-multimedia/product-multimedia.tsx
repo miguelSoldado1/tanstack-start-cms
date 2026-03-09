@@ -1,6 +1,6 @@
+import { useUploadFiles } from "@better-upload/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useUploadFiles } from "better-upload/client";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -44,7 +44,7 @@ export function ProductMultimedia({ productId }: ProductMultimediaProps) {
       toast.error("Something went wrong", { description: "Some or all files failed to upload" });
     },
     onUploadComplete: async (data) => {
-      const multimedia = data.files.map((file) => ({ objectKey: file.objectKey }));
+      const multimedia = data.files.map((file) => ({ objectKey: file.objectInfo.key }));
       const { error } = await tryCatch(createMutation.mutateAsync({ data: { multimedia, productId } }));
       if (error) {
         toast.error("Failed to upload files", { description: error.message });

@@ -1,6 +1,6 @@
+import { handleRequest, type Router, route } from "@better-upload/server";
+import { backblaze } from "@better-upload/server/clients";
 import { createFileRoute } from "@tanstack/react-router";
-import { handleRequest, type Router, route } from "better-upload/server";
-import { backblaze } from "better-upload/server/helpers";
 import { env } from "env";
 import { auth } from "@/lib/auth/auth";
 
