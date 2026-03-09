@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { admin, lastLoginMethod } from "better-auth/plugins";
-import { reactStartCookies } from "better-auth/react-start";
+import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { env } from "env";
 import { db } from "../database/drizzle";
 import * as schema from "../database/schema";
@@ -38,5 +38,5 @@ export const auth = betterAuth({
       enabled: true,
     },
   },
-  plugins: [admin({ ac, roles, defaultRole: "read", adminRoles: ["admin"] }), lastLoginMethod(), reactStartCookies()],
+  plugins: [admin({ ac, roles, defaultRole: "read", adminRoles: ["admin"] }), lastLoginMethod(), tanstackStartCookies()],
 });
