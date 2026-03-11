@@ -84,3 +84,29 @@ export const createProductBundle = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .inputValidator(createBundleInput)
   .handler(({ data }) => createHandler(data));
+
+const deleteBundleInput = z.object({
+  id: z.number(),
+});
+
+async function deleteHandler(input: z.infer<typeof deleteBundleInput>) {
+  try {
+    const [existingBundle] = await db
+      .select({ id: schema.productBundle.id })
+      .from(schema.productBundle)
+      .where(eq(schema.productBundle.id, input.id));
+
+    if (!existingBundle) {
+      throw new Error(`Product bundle with id ${input.id} not found`);
+    }
+
+    await db.delete(schema.productBundle).where(eq(schema.productBundle.id, input.id));
+  } catch (error) {
+    throw new Error("Failed to delete product bundle", { cause: error });
+  }
+}
+
+export const deleteProductBundle = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .inputValidator(deleteBundleInput)
+  .handler(({ data }) => deleteHandler(data));
