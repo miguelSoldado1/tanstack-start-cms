@@ -95,11 +95,11 @@ export interface FileRoutesByFullPath {
   '/api/upload': typeof ApiUploadRoute
   '/product/create': typeof DashboardProductCreateRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/bundle': typeof DashboardBundleIndexRoute
-  '/category': typeof DashboardCategoryIndexRoute
-  '/product': typeof DashboardProductIndexRoute
-  '/profile': typeof DashboardProfileIndexRoute
-  '/user': typeof DashboardUserIndexRoute
+  '/bundle/': typeof DashboardBundleIndexRoute
+  '/category/': typeof DashboardCategoryIndexRoute
+  '/product/': typeof DashboardProductIndexRoute
+  '/profile/': typeof DashboardProfileIndexRoute
+  '/user/': typeof DashboardUserIndexRoute
   '/product/edit/$id': typeof DashboardProductEditIdRoute
 }
 export interface FileRoutesByTo {
@@ -141,11 +141,11 @@ export interface FileRouteTypes {
     | '/api/upload'
     | '/product/create'
     | '/api/auth/$'
-    | '/bundle'
-    | '/category'
-    | '/product'
-    | '/profile'
-    | '/user'
+    | '/bundle/'
+    | '/category/'
+    | '/product/'
+    | '/profile/'
+    | '/user/'
     | '/product/edit/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -192,7 +192,7 @@ declare module '@tanstack/react-router' {
     '/_dashboard': {
       id: '/_dashboard'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof DashboardRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -227,35 +227,35 @@ declare module '@tanstack/react-router' {
     '/_dashboard/user/': {
       id: '/_dashboard/user/'
       path: '/user'
-      fullPath: '/user'
+      fullPath: '/user/'
       preLoaderRoute: typeof DashboardUserIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/_dashboard/profile/': {
       id: '/_dashboard/profile/'
       path: '/profile'
-      fullPath: '/profile'
+      fullPath: '/profile/'
       preLoaderRoute: typeof DashboardProfileIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/_dashboard/product/': {
       id: '/_dashboard/product/'
       path: '/product'
-      fullPath: '/product'
+      fullPath: '/product/'
       preLoaderRoute: typeof DashboardProductIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/_dashboard/category/': {
       id: '/_dashboard/category/'
       path: '/category'
-      fullPath: '/category'
+      fullPath: '/category/'
       preLoaderRoute: typeof DashboardCategoryIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/_dashboard/bundle/': {
       id: '/_dashboard/bundle/'
       path: '/bundle'
-      fullPath: '/bundle'
+      fullPath: '/bundle/'
       preLoaderRoute: typeof DashboardBundleIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }

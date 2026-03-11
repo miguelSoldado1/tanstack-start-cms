@@ -36,12 +36,12 @@ export function CategoryCreateForm() {
       <DialogCore.DialogTrigger asChild>
         <Button>
           <PlusIcon className="size-4" />
-          Create Category
+          Add Category
         </Button>
       </DialogCore.DialogTrigger>
       <DialogCore.DialogContent>
         <DialogCore.DialogHeader>
-          <DialogCore.DialogTitle>Create Category</DialogCore.DialogTitle>
+          <DialogCore.DialogTitle>Add Category</DialogCore.DialogTitle>
           <DialogCore.DialogDescription>Create a new category.</DialogCore.DialogDescription>
         </DialogCore.DialogHeader>
         <Form {...form}>

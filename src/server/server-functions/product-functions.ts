@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { countDistinct, eq, getTableColumns, sql } from "drizzle-orm";
+import { countDistinct, eq, getTableColumns, ilike, sql } from "drizzle-orm";
 import z from "zod";
 import { authMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
@@ -213,3 +213,24 @@ export const unpublishProduct = createServerFn()
   .middleware([authMiddleware])
   .inputValidator(unpublishProductSchema)
   .handler(({ data }) => unpublishHandler(data));
+
+const getSelectProductsInput = z.object({
+  search: z.string().trim().optional(),
+});
+
+async function getSelectProductsHandler(input: z.infer<typeof getSelectProductsInput>) {
+  const baseQuery = db
+    .select({ value: sql<string>`cast(${schema.product.id} as text)`, label: schema.product.name })
+    .from(schema.product);
+
+  const filteredQuery = input.search ? baseQuery.where(ilike(schema.product.name, `%${input.search}%`)) : baseQuery;
+
+  const products = await filteredQuery.orderBy(schema.product.name);
+
+  return products;
+}
+
+export const getSelectProducts = createServerFn()
+  .middleware([authMiddleware])
+  .inputValidator(getSelectProductsInput)
+  .handler(({ data }) => getSelectProductsHandler(data));

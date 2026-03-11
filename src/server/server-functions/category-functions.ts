@@ -52,20 +52,15 @@ export const getTableCategories = createServerFn()
   .handler(({ data }) => getTableHandler(data));
 
 const selectCategoryInput = z.object({
-  search: z.string().optional(),
+  search: z.string().trim().optional(),
 });
 
 async function getSelectCategoriesHandler(input: z.infer<typeof selectCategoryInput>) {
-  const search = input.search?.trim();
-
   const baseQuery = db
-    .select({
-      value: sql<string>`cast(${schema.category.id} as text)`,
-      label: schema.category.name,
-    })
+    .select({ value: sql<string>`cast(${schema.category.id} as text)`, label: schema.category.name })
     .from(schema.category);
 
-  const filteredQuery = search ? baseQuery.where(ilike(schema.category.name, `%${search}%`)) : baseQuery;
+  const filteredQuery = input.search ? baseQuery.where(ilike(schema.category.name, `%${input.search}%`)) : baseQuery;
 
   const categories = await filteredQuery.orderBy(schema.category.name);
 

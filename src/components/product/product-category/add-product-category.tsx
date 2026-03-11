@@ -24,7 +24,7 @@ import { createProductCategory } from "@/server/server-functions/product-categor
 import { tryCatch } from "@/try-catch";
 
 const productCategoryFormSchema = z.object({
-  category: z.string(),
+  categoryId: z.number(),
 });
 
 interface AddProductCategoryProps {
@@ -37,9 +37,6 @@ export function AddProductCategory({ productId, existingCategories }: AddProduct
   const queryClient = useQueryClient();
   const form = useForm<z.infer<typeof productCategoryFormSchema>>({
     resolver: zodResolver(productCategoryFormSchema),
-    defaultValues: {
-      category: "",
-    },
   });
 
   const getSelectCategoriesFn = useServerFn(getSelectCategories);
@@ -50,7 +47,7 @@ export function AddProductCategory({ productId, existingCategories }: AddProduct
 
   const mutation = useMutation({ mutationFn: useServerFn(createProductCategory) });
   async function onSubmit(data: z.infer<typeof productCategoryFormSchema>) {
-    const { error } = await tryCatch(mutation.mutateAsync({ data: { productId, categoryId: Number(data.category) } }));
+    const { error } = await tryCatch(mutation.mutateAsync({ data: { productId, categoryId: Number(data.categoryId) } }));
     if (error) {
       return toast.error("Failed to add product category", { description: error.message });
     }
@@ -78,11 +75,14 @@ export function AddProductCategory({ productId, existingCategories }: AddProduct
           <form className="space-y-4" id="add-category-form" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
-              name="category"
+              name="categoryId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select defaultValue={field.value} onValueChange={field.onChange}>
+                  <Select
+                    onValueChange={(val) => field.onChange(Number(val))}
+                    value={field.value ? String(field.value) : ""}
+                  >
                     <FormControl>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select a category" />

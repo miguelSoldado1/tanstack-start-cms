@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { ProductBundleCreateForm } from "@/components/bundle/product-bundle-create-form";
 import { ProductBundleTable } from "@/components/bundle/product-bundle-table";
 import { PageHeader, PageLayout } from "@/components/page-layout";
 
@@ -12,7 +13,9 @@ const DESCRIPTION = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cu
 function RouteComponent() {
   return (
     <PageLayout>
-      <PageHeader description={DESCRIPTION} title={TITLE} />
+      <PageHeader description={DESCRIPTION} title={TITLE}>
+        <ProductBundleCreateForm />
+      </PageHeader>
       <ProductBundleTable />
     </PageLayout>
   );

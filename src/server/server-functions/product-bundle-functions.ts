@@ -1,11 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { count, eq } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
+import z from "zod";
 import { authMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
 import * as schema from "@/lib/database/schema";
 import { buildQueryParams, getTableDataInput, type TableQueryConfig } from "../table-query";
-import type z from "zod";
 
 const SORT_COLUMNS = {
   createdAt: schema.productBundle.createdAt,
@@ -65,3 +65,22 @@ export const getTableProductBundles = createServerFn()
   .middleware([authMiddleware])
   .inputValidator(getTableDataInput)
   .handler(({ data }) => getTableHandler(data));
+
+const createBundleInput = z.object({
+  primaryProductId: z.number(),
+  bundledProductId: z.number(),
+});
+
+async function createHandler(input: z.infer<typeof createBundleInput>) {
+  try {
+    const [bundle] = await db.insert(schema.productBundle).values(input).returning({ id: schema.productBundle.id });
+    return bundle.id;
+  } catch (error) {
+    throw new Error("Failed to create product bundle", { cause: error });
+  }
+}
+
+export const createProductBundle = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .inputValidator(createBundleInput)
+  .handler(({ data }) => createHandler(data));

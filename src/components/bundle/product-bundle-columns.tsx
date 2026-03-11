@@ -17,21 +17,9 @@ export const columns: ColumnDef<typeof productBundle.$inferSelect>[] = [
     enableColumnFilter: true,
   },
   {
-    id: "primaryProductId",
-    accessorKey: "primaryProductId",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Primary Product Id" />,
-    enableSorting: false,
-  },
-  {
     id: "primaryProductName",
     accessorKey: "primaryProductName",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Primary Product Name" />,
-    enableSorting: false,
-  },
-  {
-    id: "bundledProductId",
-    accessorKey: "bundledProductId",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Bundled Product Id" />,
     enableSorting: false,
   },
   {
