@@ -8,6 +8,7 @@ export const user = pgTable("user", {
     .$defaultFn(() => false)
     .notNull(),
   image: text("image"),
+  imageKey: text("image_key"),
   createdAt: timestamp("created_at")
     .$defaultFn(() => new Date())
     .notNull(),

@@ -1,4 +1,5 @@
 import { type ClientUploadError, useUploadFiles } from "@better-upload/client";
+import { useServerFn } from "@tanstack/react-start";
 import { CameraIcon, Trash2Icon, UploadIcon } from "lucide-react";
 import { type ChangeEvent, useEffectEvent, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -9,11 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { authClient } from "@/lib/auth/auth-client";
 import { getCroppedImg, readFileAsDataURL } from "@/lib/image-utils";
+import { removeProfileImage, saveProfileImage } from "@/server/server-functions/profile-image-functions";
 import { tryCatch } from "@/try-catch";
 import { Spinner } from "../ui/spinner";
 
 interface UploadMetadata {
   imageUrl?: string;
+  objectKey?: string;
 }
 
 interface UploadCompleteData {
@@ -22,7 +25,9 @@ interface UploadCompleteData {
 
 export function UpdateImageForm() {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { data } = authClient.useSession();
+  const { data, refetch } = authClient.useSession();
+  const saveProfileImageFn = useServerFn(saveProfileImage);
+  const removeProfileImageFn = useServerFn(removeProfileImage);
   const [isRemoving, startRemoveTransition] = useTransition();
   const [isUploading, startUploadTransition] = useTransition();
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
@@ -44,6 +49,10 @@ export function UpdateImageForm() {
     }
   });
 
+  const refreshSession = useEffectEvent(async () => {
+    await refetch({ query: { disableCookieCache: true } });
+  });
+
   const { control } = useUploadFiles({
     route: "profileImage",
     onError: useEffectEvent((error: ClientUploadError) => {
@@ -54,18 +63,20 @@ export function UpdateImageForm() {
     }),
     onUploadComplete: useEffectEvent(async ({ metadata }: UploadCompleteData) => {
       const imageUrl = metadata?.imageUrl;
+      const objectKey = metadata?.objectKey;
 
-      if (!imageUrl) {
+      if (!(imageUrl && objectKey)) {
         toast.error("Failed to save image", { description: "The uploaded file URL was not returned." });
         return;
       }
 
-      const { error } = await tryCatch(authClient.updateUser({ image: imageUrl }));
+      const { error } = await tryCatch(saveProfileImageFn({ data: { imageKey: objectKey, imageUrl } }));
       if (error) {
         toast.error("Failed to update profile image", { description: error.message });
         return;
       }
 
+      await refreshSession();
       toast.success("Profile image updated successfully!");
     }),
   });
@@ -104,13 +115,15 @@ export function UpdateImageForm() {
     if (!data?.user?.image) return;
 
     startRemoveTransition(async () => {
-      const { error } = await tryCatch(authClient.updateUser({ image: null }));
+      const { error } = await tryCatch(removeProfileImageFn());
 
       if (error) {
         toast.error("Failed to remove profile image", { description: error.message });
         return;
       }
 
+      await refreshSession();
+      setRemoveDialogOpen(false);
       toast.success("Profile image removed successfully!");
     });
   }

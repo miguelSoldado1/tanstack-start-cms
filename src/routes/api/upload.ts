@@ -1,18 +1,11 @@
 import { handleRequest, type Router, route } from "@better-upload/server";
-import { backblaze } from "@better-upload/server/clients";
 import { createFileRoute } from "@tanstack/react-router";
-import { env } from "env";
 import { auth } from "@/lib/auth/auth";
-
-const client = backblaze({
-  region: env.BACKBLAZE_REGION,
-  applicationKeyId: env.BACKBLAZE_APPLICATION_KEY_ID,
-  applicationKey: env.BACKBLAZE_APPLICATION_KEY,
-});
+import { backblazeBucketName, backblazeClient, getBackblazeObjectUrl } from "@/lib/storage/backblaze";
 
 const router: Router = {
-  client,
-  bucketName: env.BACKBLAZE_BUCKET_NAME,
+  client: backblazeClient,
+  bucketName: backblazeBucketName,
   routes: {
     productMultimedia: route({
       fileTypes: ["image/*"],
@@ -34,9 +27,7 @@ const router: Router = {
         }
       },
       onAfterSignedUrl: async ({ file }) => ({
-        metadata: {
-          imageUrl: `https://f003.backblazeb2.com/file/${env.BACKBLAZE_BUCKET_NAME}/${file.objectInfo.key}`,
-        },
+        metadata: { imageUrl: getBackblazeObjectUrl(file.objectInfo.key), objectKey: file.objectInfo.key },
       }),
     }),
   },
