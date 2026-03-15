@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader, PageLayout } from "@/components/page-layout";
 import { DeleteAccountForm } from "@/components/profile/delete-account-form";
+import { UpdateImageForm } from "@/components/profile/update-image-form";
 import { UpdateNameForm } from "@/components/profile/update-name-form";
 import { UpdatePasswordForm } from "@/components/profile/update-password-form";
 import { getUser } from "@/server/server-functions/auth-functions";
@@ -18,6 +19,7 @@ function RouteComponent() {
     <PageLayout>
       <PageHeader description={DESCRIPTION} title={TITLE} />
       <section className="container space-y-6 rounded-xl p-6">
+        <UpdateImageForm />
         <UpdateNameForm />
         <UpdatePasswordForm />
         <DeleteAccountForm />

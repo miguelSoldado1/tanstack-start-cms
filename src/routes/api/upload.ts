@@ -24,6 +24,21 @@ const router: Router = {
         }
       },
     }),
+    profileImage: route({
+      fileTypes: ["image/*"],
+      multipleFiles: false,
+      onBeforeUpload: async (data) => {
+        const session = await auth.api.getSession({ headers: data.req.headers });
+        if (!session?.user) {
+          throw new Error("Not logged in!");
+        }
+      },
+      onAfterSignedUrl: async ({ file }) => ({
+        metadata: {
+          imageUrl: `https://f003.backblazeb2.com/file/${env.BACKBLAZE_BUCKET_NAME}/${file.objectInfo.key}`,
+        },
+      }),
+    }),
   },
 };
 export const Route = createFileRoute("/api/upload")({

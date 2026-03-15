@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { ChevronsUpDown, LogOutIcon, Monitor, Moon, Sun, UserPenIcon } from "lucide-react";
 // import { useTheme } from "next-themes";
 import { toast } from "sonner";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/auth/user-avatar";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -45,9 +45,9 @@ export function NavUser() {
             disabled={!data?.user}
             size="lg"
           >
-            <Avatar className="size-8 rounded-full border">
-              {data?.user ? <AvatarFallback>{data.user.name.charAt(0).toUpperCase()}</AvatarFallback> : null}
-            </Avatar>
+            {data?.user ? (
+              <UserAvatar className="size-8 rounded-full border" image={data.user.image} name={data.user.email} />
+            ) : null}
             <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
               {data?.user ? (
                 <span className="truncate font-medium">{data.user.name}</span>
@@ -67,9 +67,9 @@ export function NavUser() {
         >
           <DropdownMenuLabel className="p-0 font-normal">
             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-              <Avatar className="h-8 w-8 rounded-full border">
-                {data?.user ? <AvatarFallback>{data.user.name.charAt(0).toUpperCase()}</AvatarFallback> : null}
-              </Avatar>
+              {data?.user ? (
+                <UserAvatar className="h-8 w-8 rounded-full border" image={data.user.image} name={data.user.email} />
+              ) : null}
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <div className="flex items-center justify-between">
                   <span className="truncate font-medium">{data?.user.name}</span>

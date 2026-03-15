@@ -1,5 +1,4 @@
-import { Facehash } from "facehash";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/auth/user-avatar";
 import { formatDate } from "@/lib/format";
 import { DataTableColumnHeader } from "../../data-table/data-table-column-header";
 import { Badge } from "../../ui/badge";
@@ -8,32 +7,11 @@ import { UserActionsDropdownMenu } from "./user-actions-dropdown-menu";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { user } from "@/lib/database/schema";
 
-const FACEHASH_COLORS = ["#0f766e", "#f59e0b", "#2563eb", "#ef4444", "#7c3aed"];
-
 export const columns: ColumnDef<typeof user.$inferSelect>[] = [
   {
     id: "avatar",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Avatar" />,
-    cell: ({ row }) => {
-      const { email, image, name } = row.original;
-      const imageSrc = image?.trim() || undefined;
-
-      return (
-        <Avatar className="size-7 border">
-          <AvatarImage alt={name} className="object-cover" src={imageSrc} />
-          <AvatarFallback className="bg-transparent p-0">
-            <Facehash
-              colors={FACEHASH_COLORS}
-              intensity3d="none"
-              interactive={false}
-              name={email}
-              showInitial={false}
-              size={28}
-            />
-          </AvatarFallback>
-        </Avatar>
-      );
-    },
+    cell: ({ row }) => <UserAvatar className="size-7 border" image={row.original.image} name={row.original.email} />,
     enableSorting: false,
     enableColumnFilter: false,
     size: 60,
