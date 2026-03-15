@@ -1,10 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { asc, desc, eq } from "drizzle-orm";
-import { env } from "env";
 import z from "zod";
 import { authMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
 import * as schema from "@/lib/database/schema";
+import { deleteBackblazeObject, getBackblazeObjectKey, getBackblazeObjectUrl } from "@/lib/storage/backblaze";
 
 const getProductMultimediaInput = z.object({ productId: z.number() });
 
@@ -36,7 +36,7 @@ async function createHandler(input: z.infer<typeof createProductMultimediaInput>
     const nextOrder = lastImage ? lastImage.order + 1 : 1;
     await tx.insert(schema.productMultimedia).values(
       input.multimedia.map((media, index) => ({
-        url: `https://f003.backblazeb2.com/file/${env.BACKBLAZE_BUCKET_NAME}/${media.objectKey}`,
+        url: getBackblazeObjectUrl(media.objectKey),
         productId: input.productId,
         order: nextOrder + index,
       }))
@@ -64,6 +64,13 @@ async function deleteHandler(input: z.infer<typeof deleteProductMultimediaInput>
     }
 
     await db.delete(schema.productMultimedia).where(eq(schema.productMultimedia.id, input.id));
+
+    const objectKey = getBackblazeObjectKey(existingImage.url);
+    if (!objectKey) {
+      return;
+    }
+
+    await deleteBackblazeObject(objectKey);
   } catch (error) {
     throw new Error("Failed to delete product multimedia", { cause: error });
   }
