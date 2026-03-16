@@ -216,16 +216,20 @@ export const unpublishProduct = createServerFn()
 
 const getSelectProductsInput = z.object({
   search: z.string().trim().optional(),
+  limit: z.number().int().positive().max(50).optional(),
 });
 
 async function getSelectProductsHandler(input: z.infer<typeof getSelectProductsInput>) {
+  const search = input.search;
+  const limit = input.limit ?? 20;
+
   const baseQuery = db
     .select({ value: sql<string>`cast(${schema.product.id} as text)`, label: schema.product.name })
     .from(schema.product);
 
-  const filteredQuery = input.search ? baseQuery.where(ilike(schema.product.name, `%${input.search}%`)) : baseQuery;
+  const filteredQuery = search ? baseQuery.where(ilike(schema.product.name, `%${search}%`)) : baseQuery;
 
-  const products = await filteredQuery.orderBy(schema.product.name);
+  const products = await filteredQuery.orderBy(schema.product.name).limit(limit);
 
   return products;
 }

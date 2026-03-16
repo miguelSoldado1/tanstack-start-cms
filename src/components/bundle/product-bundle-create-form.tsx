@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
@@ -11,8 +11,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { createProductBundle } from "@/server/server-functions/product-bundle-functions";
 import { getSelectProducts } from "@/server/server-functions/product-functions";
 import { tryCatch } from "@/try-catch";
+import { AsyncCombobox } from "../shared/async-combobox";
 import { Button } from "../ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 const productBundleFormSchema = z.object({
   primaryProductId: z.number(),
@@ -27,10 +27,6 @@ export function ProductBundleCreateForm() {
   });
 
   const getSelectProductsFn = useServerFn(getSelectProducts);
-  const query = useQuery({
-    queryKey: ["select", "products"],
-    queryFn: () => getSelectProductsFn({ data: {} }),
-  });
 
   const mutation = useMutation({ mutationFn: useServerFn(createProductBundle) });
   async function onSubmit(data: z.infer<typeof productBundleFormSchema>) {
@@ -68,23 +64,16 @@ export function ProductBundleCreateForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Primary Product</FormLabel>
-                  <Select
-                    onValueChange={(val) => field.onChange(Number(val))}
-                    value={field.value ? String(field.value) : ""}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent avoidCollisions={false} className="max-h-60" side="bottom">
-                      {query.data?.map((product) => (
-                        <SelectItem key={product.value} value={String(product.value)}>
-                          {product.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <AsyncCombobox
+                      emptyText="No products found."
+                      onValueChange={(value) => field.onChange(value ? Number(value) : undefined)}
+                      placeholder="Search products..."
+                      queryFn={({ search }) => getSelectProductsFn({ data: { search } })}
+                      queryKey="select-products"
+                      value={field.value ? String(field.value) : ""}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -94,24 +83,17 @@ export function ProductBundleCreateForm() {
               name="bundledProductId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Bundle Product</FormLabel>
-                  <Select
-                    onValueChange={(val) => field.onChange(Number(val))}
-                    value={field.value ? String(field.value) : ""}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent avoidCollisions={false} className="max-h-60" side="bottom">
-                      {query.data?.map((product) => (
-                        <SelectItem key={product.value} value={String(product.value)}>
-                          {product.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Bundled Product</FormLabel>
+                  <FormControl>
+                    <AsyncCombobox
+                      emptyText="No products found."
+                      onValueChange={(value) => field.onChange(value ? Number(value) : undefined)}
+                      placeholder="Search products..."
+                      queryFn={({ search }) => getSelectProductsFn({ data: { search } })}
+                      queryKey="select-products"
+                      value={field.value ? String(field.value) : ""}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

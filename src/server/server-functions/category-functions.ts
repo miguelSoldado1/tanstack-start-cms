@@ -53,16 +53,20 @@ export const getTableCategories = createServerFn()
 
 const selectCategoryInput = z.object({
   search: z.string().trim().optional(),
+  limit: z.number().int().positive().max(50).optional(),
 });
 
 async function getSelectCategoriesHandler(input: z.infer<typeof selectCategoryInput>) {
+  const search = input.search;
+  const limit = input.limit ?? 20;
+
   const baseQuery = db
     .select({ value: sql<string>`cast(${schema.category.id} as text)`, label: schema.category.name })
     .from(schema.category);
 
-  const filteredQuery = input.search ? baseQuery.where(ilike(schema.category.name, `%${input.search}%`)) : baseQuery;
+  const filteredQuery = search ? baseQuery.where(ilike(schema.category.name, `%${search}%`)) : baseQuery;
 
-  const categories = await filteredQuery.orderBy(schema.category.name);
+  const categories = await filteredQuery.orderBy(schema.category.name).limit(limit);
 
   return categories;
 }

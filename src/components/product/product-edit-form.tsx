@@ -55,7 +55,11 @@ export function ProductEditForm({ id }: ProductEditFormProps) {
 
   return (
     <section className="container space-y-6 rounded-xl border p-6">
-      <Accordion className="w-full" defaultValue={["basic-info", "product-multimedia"]} type="multiple">
+      <Accordion
+        className="w-full"
+        defaultValue={["basic-info", "product-multimedia", "product-categories"]}
+        type="multiple"
+      >
         <AccordionItem className="mb-4 rounded-lg border" value="record-info">
           <AccordionTrigger className="px-4 py-3">Record Information</AccordionTrigger>
           <AccordionContent className="my-1 px-4 pb-4">

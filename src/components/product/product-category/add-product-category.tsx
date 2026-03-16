@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
+import { AsyncCombobox } from "@/components/shared/async-combobox";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,7 +19,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getSelectCategories } from "@/server/server-functions/category-functions";
 import { createProductCategory } from "@/server/server-functions/product-category-functions";
 import { tryCatch } from "@/try-catch";
@@ -40,10 +40,6 @@ export function AddProductCategory({ productId, existingCategories }: AddProduct
   });
 
   const getSelectCategoriesFn = useServerFn(getSelectCategories);
-  const query = useQuery({
-    queryKey: ["categories"],
-    queryFn: () => getSelectCategoriesFn({ data: {} }),
-  });
 
   const mutation = useMutation({ mutationFn: useServerFn(createProductCategory) });
   async function onSubmit(data: z.infer<typeof productCategoryFormSchema>) {
@@ -79,27 +75,17 @@ export function AddProductCategory({ productId, existingCategories }: AddProduct
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select
-                    onValueChange={(val) => field.onChange(Number(val))}
-                    value={field.value ? String(field.value) : ""}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent avoidCollisions={false} className="max-h-60" side="bottom">
-                      {query.data?.map((option) => (
-                        <SelectItem
-                          disabled={existingCategories.includes(Number(option.value))}
-                          key={option.value}
-                          value={option.value.toString()}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <AsyncCombobox
+                      emptyText="No categories found."
+                      isOptionDisabled={(option) => existingCategories.includes(Number(option.value))}
+                      onValueChange={(value) => field.onChange(value ? Number(value) : undefined)}
+                      placeholder="Search categories..."
+                      queryFn={({ search }) => getSelectCategoriesFn({ data: { search } })}
+                      queryKey="select-categories"
+                      value={field.value ? String(field.value) : ""}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
