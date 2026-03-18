@@ -1,9 +1,12 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
-import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { createRootRoute, HeadContent, Link, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { FileQuestionIcon } from "lucide-react";
 import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Button } from "@/components/ui/button";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Toaster } from "@/components/ui/sonner";
 import appCss from "../styles.css?url";
 
@@ -19,6 +22,7 @@ export const Route = createRootRoute({
       { rel: "icon", href: "/favicon.svg" },
     ],
   }),
+  notFoundComponent: NotFound,
   shellComponent: RootDocument,
 });
 
@@ -47,5 +51,24 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
+  );
+}
+
+function NotFound() {
+  return (
+    <main className="flex min-h-screen items-center justify-center p-6">
+      <Empty className="max-w-md border">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <FileQuestionIcon />
+          </EmptyMedia>
+          <EmptyTitle>Page not found</EmptyTitle>
+          <EmptyDescription>The page you requested does not exist or is no longer available.</EmptyDescription>
+        </EmptyHeader>
+        <Button asChild>
+          <Link to="/">Go to dashboard</Link>
+        </Button>
+      </Empty>
+    </main>
   );
 }
