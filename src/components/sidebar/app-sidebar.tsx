@@ -10,15 +10,16 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { appConfig } from "@/config/app";
 import { DropdownMenuSeparator } from "../ui/dropdown-menu";
 import { Kbd, KbdGroup } from "../ui/kbd";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import type * as React from "react";
-import type { NavigationItem } from "./nav-main";
+import type { AppNavigationItem } from "@/config/app";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  navigationItems: NavigationItem[];
+  navigationItems: AppNavigationItem[];
 }
 
 export function AppSidebar({ navigationItems, ...props }: AppSidebarProps) {
@@ -34,8 +35,8 @@ export function AppSidebar({ navigationItems, ...props }: AppSidebarProps) {
                 <GalleryVerticalEndIcon className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">Acme Inc</span>
-                <span className="truncate text-xs">Dashboard</span>
+                <span className="truncate font-medium">{appConfig.appName}</span>
+                <span className="truncate text-xs">{appConfig.appTagline}</span>
               </div>
             </div>
           </SidebarMenuItem>

@@ -9,6 +9,7 @@ import { Form, FormField } from "@/components/ui/form";
 import { FormItemWrapper } from "@/components/ui/form-item-wrapper";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
+import { appConfig } from "@/config/app";
 import { authClient } from "@/lib/auth/auth-client";
 import { FieldDescription, FieldSeparator } from "../ui/field";
 import { AuthHeader, AuthHeaderDescription, AuthHeaderTitle } from "./auth-header";
@@ -20,7 +21,14 @@ const formSchema = z.object({
   password: z.string().min(8).max(128),
 });
 
-export function SignInForm() {
+interface SignInFormProps {
+  enabledProviders: {
+    google: boolean;
+    github: boolean;
+  };
+}
+
+export function SignInForm({ enabledProviders }: SignInFormProps) {
   const navigate = useNavigate();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
@@ -36,7 +44,7 @@ export function SignInForm() {
       return toast.error(error.message || "An error occurred while signing in.");
     }
 
-    navigate({ to: "/user" });
+    navigate({ to: appConfig.defaultAuthenticatedPath });
   }
 
   const isFormSubmitting = form.formState.isSubmitting || isSigningIn;
@@ -44,10 +52,8 @@ export function SignInForm() {
   return (
     <div className="flex flex-col gap-4">
       <AuthHeader>
-        <AuthHeaderTitle>Welcome to Acme Inc</AuthHeaderTitle>
-        <AuthHeaderDescription>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed lobortis magna ac tortor ullamcorper malesuada.
-        </AuthHeaderDescription>
+        <AuthHeaderTitle>{appConfig.authTitle}</AuthHeaderTitle>
+        <AuthHeaderDescription>{appConfig.authDescription}</AuthHeaderDescription>
       </AuthHeader>
       <Form {...form}>
         <form className="flex flex-col gap-6" onSubmit={form.handleSubmit(onSubmit)}>
@@ -56,7 +62,7 @@ export function SignInForm() {
             name="email"
             render={({ field }) => (
               <FormItemWrapper label="Email">
-                <Input {...field} disabled={isFormSubmitting} placeholder="email@acme.com" type="email" />
+                <Input {...field} disabled={isFormSubmitting} placeholder="name@company.com" type="email" />
               </FormItemWrapper>
             )}
           />
@@ -77,8 +83,17 @@ export function SignInForm() {
           </div>
         </form>
       </Form>
-      <FieldSeparator>Or</FieldSeparator>
-      <AuthSocialProviders isLoading={isSigningIn} lastMethod={lastMethod} setIsLoading={setIsSigningIn} />
+      {enabledProviders.google || enabledProviders.github ? (
+        <>
+          <FieldSeparator>Or</FieldSeparator>
+          <AuthSocialProviders
+            enabledProviders={enabledProviders}
+            isLoading={isSigningIn}
+            lastMethod={lastMethod}
+            setIsLoading={setIsSigningIn}
+          />
+        </>
+      ) : null}
       <FieldDescription className="text-center">
         Don't have an account? <Link to="/sign-up">Sign up</Link>
       </FieldDescription>

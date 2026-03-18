@@ -10,6 +10,7 @@ import { Form, FormField } from "@/components/ui/form";
 import { FormItemWrapper } from "@/components/ui/form-item-wrapper";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
+import { appConfig } from "@/config/app";
 import { authClient } from "@/lib/auth/auth-client";
 import { AuthHeader, AuthHeaderDescription, AuthHeaderTitle } from "./auth-header";
 import { AuthSocialProviders } from "./auth-social-providers";
@@ -23,7 +24,14 @@ const formSchema = z.object({
   password: z.string().min(8).max(128),
 });
 
-export function SignUpForm() {
+interface SignUpFormProps {
+  enabledProviders: {
+    google: boolean;
+    github: boolean;
+  };
+}
+
+export function SignUpForm({ enabledProviders }: SignUpFormProps) {
   const navigate = useNavigate();
   const [isSigningUp, setIsSigningUp] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
@@ -39,7 +47,7 @@ export function SignUpForm() {
       return toast.error(error.message || "An error occurred while signing up.");
     }
 
-    navigate({ to: "/user" });
+    navigate({ to: appConfig.defaultAuthenticatedPath });
   }
 
   const isFormSubmitting = form.formState.isSubmitting || isSigningUp;
@@ -47,10 +55,8 @@ export function SignUpForm() {
   return (
     <div className="flex flex-col gap-4">
       <AuthHeader>
-        <AuthHeaderTitle>Welcome to Acme Inc</AuthHeaderTitle>
-        <AuthHeaderDescription>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed lobortis magna ac tortor ullamcorper malesuada.
-        </AuthHeaderDescription>
+        <AuthHeaderTitle>{appConfig.authTitle}</AuthHeaderTitle>
+        <AuthHeaderDescription>{appConfig.authDescription}</AuthHeaderDescription>
       </AuthHeader>
       <Form {...form}>
         <form className="flex flex-col gap-6" onSubmit={form.handleSubmit(onSubmit)}>
@@ -62,7 +68,7 @@ export function SignUpForm() {
                 <Input
                   {...field}
                   disabled={isFormSubmitting || DISABLE_SIGN_UP_WITH_EMAIL}
-                  placeholder="email@acme.com"
+                  placeholder="name@company.com"
                   type="email"
                 />
               </FormItemWrapper>
@@ -101,8 +107,17 @@ export function SignUpForm() {
           {lastMethod === "email" && <LastUsedBadge />}
         </form>
       </Form>
-      <FieldSeparator>Or</FieldSeparator>
-      <AuthSocialProviders isLoading={isSigningUp} lastMethod={lastMethod} setIsLoading={setIsSigningUp} />
+      {enabledProviders.google || enabledProviders.github ? (
+        <>
+          <FieldSeparator>Or</FieldSeparator>
+          <AuthSocialProviders
+            enabledProviders={enabledProviders}
+            isLoading={isSigningUp}
+            lastMethod={lastMethod}
+            setIsLoading={setIsSigningUp}
+          />
+        </>
+      ) : null}
       <FieldDescription className="text-center">
         Already have an account? <Link to="/sign-in">Sign in</Link>
       </FieldDescription>

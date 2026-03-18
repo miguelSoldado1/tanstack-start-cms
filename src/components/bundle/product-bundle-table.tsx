@@ -1,4 +1,4 @@
-import { useServerFn } from "node_modules/@tanstack/react-start/dist/esm/useServerFn";
+import { useServerFn } from "@tanstack/react-start";
 import { useQueryTable } from "@/hooks/use-query-table";
 import { getTableProductBundles } from "@/server/server-functions/product-bundle-functions";
 import { DataTable } from "../data-table/data-table";

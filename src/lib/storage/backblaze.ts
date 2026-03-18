@@ -11,7 +11,7 @@ export const backblazeClient = backblaze({
 
 export const backblazeBucketName = env.BACKBLAZE_BUCKET_NAME;
 
-export const backblazeS3Client = new S3Client({
+const backblazeS3Client = new S3Client({
   region: env.BACKBLAZE_REGION,
   endpoint: `https://s3.${env.BACKBLAZE_REGION}.backblazeb2.com`,
   credentials: {

@@ -1,83 +1,51 @@
-import { Link, type LinkProps, useLocation } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import clsx from "clsx";
-import { ChevronRight } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-} from "@/components/ui/sidebar";
+  FolderKanbanIcon,
+  LayoutDashboardIcon,
+  PackageIcon,
+  PackageOpenIcon,
+  SettingsIcon,
+  TagIcon,
+  UsersRoundIcon,
+} from "lucide-react";
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import type { LucideIcon } from "lucide-react";
+import type { AppIconKey, AppNavigationItem } from "@/config/app";
 
-export interface NavigationItem {
-  title: string;
-  url: LinkProps["to"];
-  icon: LucideIcon;
-  items?: {
-    title: string;
-    url: LinkProps["to"];
-    icon?: LucideIcon;
-  }[];
-  roleAccess?: "admin" | "write" | "read";
-}
+const iconMap = {
+  overview: LayoutDashboardIcon,
+  users: UsersRoundIcon,
+  profile: SettingsIcon,
+  products: PackageOpenIcon,
+  categories: TagIcon,
+  bundles: PackageIcon,
+  resource: FolderKanbanIcon,
+  examples: FolderKanbanIcon,
+  app: LayoutDashboardIcon,
+} satisfies Record<AppIconKey, LucideIcon>;
 
 interface NavMainProps {
-  items: NavigationItem[];
+  items: AppNavigationItem[];
+}
+
+function renderNavigationItem(item: AppNavigationItem, pathname: string) {
+  const Icon = iconMap[item.icon];
+
+  return (
+    <SidebarMenuItem className={clsx("rounded-lg", pathname === item.url && "bg-muted")} key={item.title}>
+      <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
+        <Link to={item.url}>
+          <Icon />
+          <span>{item.title}</span>
+        </Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  );
 }
 
 export function NavMain({ items }: NavMainProps) {
   const pathname = useLocation({ select: (location) => location.pathname });
 
-  return (
-    <SidebarMenu className="p-2">
-      {items.map((item) => (
-        <SidebarMenuItem className={clsx("rounded-lg", pathname === item.url && "bg-muted")} key={item.title}>
-          {item.items && item.items.length > 0 ? (
-            <Collapsible
-              asChild
-              className="group/collapsible"
-              defaultOpen={item.items.some((subItem) => subItem.url === pathname)}
-            >
-              <div>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton className="cursor-pointer" tooltip={item.title}>
-                    {item.icon && <item.icon />}
-                    <span>{item.title}</span>
-                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    {item.items.map((subItem) => (
-                      <SidebarMenuSubItem
-                        className={clsx(pathname === item.url && "rounded-lg bg-muted")}
-                        key={subItem.title}
-                      >
-                        <SidebarMenuSubButton asChild>
-                          <Link to={subItem.url}>
-                            {subItem.icon && <subItem.icon />}
-                            <span>{subItem.title}</span>
-                          </Link>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    ))}
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </div>
-            </Collapsible>
-          ) : (
-            <SidebarMenuButton asChild tooltip={item.title}>
-              <a href={item.url}>
-                {item.icon && <item.icon />}
-                <span>{item.title}</span>
-              </a>
-            </SidebarMenuButton>
-          )}
-        </SidebarMenuItem>
-      ))}
-    </SidebarMenu>
-  );
+  return <SidebarMenu className="p-2">{items.map((item) => renderNavigationItem(item, pathname))}</SidebarMenu>;
 }

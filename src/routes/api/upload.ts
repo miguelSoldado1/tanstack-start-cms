@@ -32,6 +32,7 @@ const router: Router = {
     }),
   },
 };
+
 export const Route = createFileRoute("/api/upload")({
   server: {
     handlers: {

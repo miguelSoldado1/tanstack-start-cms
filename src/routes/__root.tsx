@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Toaster } from "@/components/ui/sonner";
+import { appConfig } from "@/config/app";
 import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
@@ -15,7 +16,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Acme Inc Dashboard" },
+      { title: appConfig.appName },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
