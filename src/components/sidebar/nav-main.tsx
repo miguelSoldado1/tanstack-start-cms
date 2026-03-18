@@ -1,28 +1,16 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import clsx from "clsx";
-import {
-  FolderKanbanIcon,
-  LayoutDashboardIcon,
-  PackageIcon,
-  PackageOpenIcon,
-  SettingsIcon,
-  TagIcon,
-  UsersRoundIcon,
-} from "lucide-react";
+import { PackageIcon, PackageOpenIcon, SettingsIcon, TagIcon, UsersRoundIcon } from "lucide-react";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import type { LucideIcon } from "lucide-react";
 import type { AppIconKey, AppNavigationItem } from "@/config/app";
 
 const iconMap = {
-  overview: LayoutDashboardIcon,
   users: UsersRoundIcon,
   profile: SettingsIcon,
   products: PackageOpenIcon,
   categories: TagIcon,
   bundles: PackageIcon,
-  resource: FolderKanbanIcon,
-  examples: FolderKanbanIcon,
-  app: LayoutDashboardIcon,
 } satisfies Record<AppIconKey, LucideIcon>;
 
 interface NavMainProps {

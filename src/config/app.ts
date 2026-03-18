@@ -1,15 +1,6 @@
 export type NavigationRoleAccess = "admin" | "write" | "read";
 
-export type AppIconKey =
-  | "overview"
-  | "users"
-  | "profile"
-  | "products"
-  | "categories"
-  | "bundles"
-  | "resource"
-  | "examples"
-  | "app";
+export type AppIconKey = "users" | "profile" | "products" | "categories" | "bundles";
 
 export interface AppNavigationItem {
   title: string;
@@ -43,15 +34,7 @@ const catalogNavigation: AppNavigationItem[] = [
   { title: "Bundles", url: "/bundle", icon: "bundles" },
 ];
 
-const generatedNavigation: AppNavigationItem[] = [
-  // __GENERATED_NAV_ITEMS__
-];
-
-const navigation: AppNavigationItem[] = [
-  ...coreNavigation,
-  ...(enabledExamples.catalog ? catalogNavigation : []),
-  ...generatedNavigation,
-];
+const navigation: AppNavigationItem[] = [...coreNavigation, ...(enabledExamples.catalog ? catalogNavigation : [])];
 
 export const appConfig: AppConfig = {
   appName: "Starter Dashboard",
