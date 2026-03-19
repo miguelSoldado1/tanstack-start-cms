@@ -1,9 +1,10 @@
 import { useCallback, useState } from "react";
 import { getCroppedImg, readFileAsDataURL } from "@/lib/image-utils";
+import { tryCatch } from "@/try-catch";
 import { ImageCropperDialog } from "./image-cropper-dialog";
 import { UploadDropzone } from "./upload-dropzone";
 
-export function UploadWithCropper({ onUpload }: { onUpload: (file: File) => void }) {
+export function UploadWithCropper({ onUpload }: { onUpload: (file: File) => unknown }) {
   const [isPending, setIsPending] = useState(false);
   const [cropModalOpen, setCropModalOpen] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | undefined>(undefined);
@@ -26,7 +27,7 @@ export function UploadWithCropper({ onUpload }: { onUpload: (file: File) => void
       setCropModalOpen(true);
     } else {
       setIsPending(true);
-      onUpload(file);
+      await tryCatch(Promise.resolve(onUpload(file)));
       setIsPending(false);
     }
   }
@@ -50,10 +51,18 @@ export function UploadWithCropper({ onUpload }: { onUpload: (file: File) => void
   async function handleCropConfirm() {
     if (!(imageSrc && croppedAreaPixels && fileToCrop)) return;
     setIsPending(true);
-    const croppedFile = await getCroppedImg(imageSrc, croppedAreaPixels, fileToCrop.name);
-    onUpload(croppedFile);
+    const { data: croppedFile, error: cropError } = await tryCatch(
+      getCroppedImg(imageSrc, croppedAreaPixels, fileToCrop.name)
+    );
+
+    if (!cropError && croppedFile) {
+      const { error: uploadError } = await tryCatch(Promise.resolve(onUpload(croppedFile)));
+      if (!uploadError) {
+        handleCropCancel();
+      }
+    }
+
     setIsPending(false);
-    handleCropCancel();
   }
 
   return (
@@ -63,6 +72,7 @@ export function UploadWithCropper({ onUpload }: { onUpload: (file: File) => void
         aspect={1}
         crop={crop}
         image={imageSrc}
+        isPending={isPending}
         onCancel={handleCropCancel}
         onConfirm={handleCropConfirm}
         onCropChange={setCrop}

@@ -5,14 +5,29 @@ import type { CropperProps } from "react-easy-crop";
 
 interface ImageCropperDialogProps
   extends Pick<CropperProps, "image" | "crop" | "zoom" | "aspect" | "onCropChange" | "onZoomChange" | "onCropComplete"> {
+  isPending?: boolean;
   open: boolean;
   onCancel: () => void;
   onConfirm: () => void;
 }
 
-export function ImageCropperDialog({ open, onCancel, onConfirm, image, ...cropperProps }: ImageCropperDialogProps) {
+export function ImageCropperDialog({
+  isPending,
+  open,
+  onCancel,
+  onConfirm,
+  image,
+  ...cropperProps
+}: ImageCropperDialogProps) {
   return (
-    <Dialog onOpenChange={onCancel} open={open}>
+    <Dialog
+      onOpenChange={(nextOpen) => {
+        if (!(nextOpen || isPending)) {
+          onCancel();
+        }
+      }}
+      open={open}
+    >
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Crop Image</DialogTitle>
@@ -20,11 +35,13 @@ export function ImageCropperDialog({ open, onCancel, onConfirm, image, ...croppe
         <div className="relative h-64 w-full">{image && <Cropper {...cropperProps} image={image} />}</div>
         <DialogFooter className="mt-4">
           <DialogClose asChild>
-            <Button onClick={onCancel} variant="outline">
+            <Button disabled={isPending} onClick={onCancel} variant="outline">
               Cancel
             </Button>
           </DialogClose>
-          <Button onClick={onConfirm}>Crop & Upload</Button>
+          <Button disabled={isPending} onClick={onConfirm}>
+            Crop & Upload
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
