@@ -60,7 +60,7 @@ export const columns: ColumnDef<typeof user.$inferSelect>[] = [
   {
     id: "actions",
     cell({ row }) {
-      return <UserActionsDropdownMenu id={row.original.id} />;
+      return <UserActionsDropdownMenu id={row.original.id} role={row.original.role} />;
     },
     size: 20,
   },

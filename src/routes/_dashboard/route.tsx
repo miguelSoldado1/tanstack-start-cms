@@ -1,4 +1,5 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { ImpersonationBanner } from "@/components/auth/impersonation-banner";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { appConfig } from "@/config/app";
@@ -24,6 +25,7 @@ function RouteComponent() {
             <SidebarTrigger className="size-8" />
           </div>
         </div>
+        <ImpersonationBanner />
         <Outlet />
       </SidebarInset>
     </SidebarProvider>
