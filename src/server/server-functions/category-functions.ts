@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { count, eq, ilike, sql } from "drizzle-orm";
 import z from "zod";
-import { authMiddleware } from "@/lib/auth/auth-middleware";
+import { authMiddleware, writeMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
 import * as schema from "@/lib/database/schema";
 import { buildQueryParams, getTableDataInput, type TableQueryConfig } from "../table-query";
@@ -112,7 +112,7 @@ async function deleteHandler(input: z.infer<typeof deleteCategorySchema>) {
 }
 
 export const deleteCategory = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
+  .middleware([writeMiddleware])
   .inputValidator(deleteCategorySchema)
   .handler(({ data }) => deleteHandler(data));
 
@@ -130,7 +130,7 @@ async function createHandler(input: z.infer<typeof createCategoryInput>) {
 }
 
 export const createCategory = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
+  .middleware([writeMiddleware])
   .inputValidator(createCategoryInput)
   .handler(({ data }) => createHandler(data));
 
@@ -160,6 +160,6 @@ async function updateHandler(input: z.infer<typeof updateCategorySchema>) {
 }
 
 export const updateCategory = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
+  .middleware([writeMiddleware])
   .inputValidator(updateCategorySchema)
   .handler(({ data }) => updateHandler(data));

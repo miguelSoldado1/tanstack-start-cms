@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { asc, desc, eq } from "drizzle-orm";
 import z from "zod";
-import { authMiddleware } from "@/lib/auth/auth-middleware";
+import { authMiddleware, writeMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
 import * as schema from "@/lib/database/schema";
 import { deleteBackblazeObject, getBackblazeObjectKey, getBackblazeObjectUrl } from "@/lib/storage/backblaze";
@@ -45,7 +45,7 @@ async function createHandler(input: z.infer<typeof createProductMultimediaInput>
 }
 
 export const createProductMultimedia = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
+  .middleware([writeMiddleware])
   .inputValidator(createProductMultimediaInput)
   .handler(({ data }) => createHandler(data));
 
@@ -77,7 +77,7 @@ async function deleteHandler(input: z.infer<typeof deleteProductMultimediaInput>
 }
 
 export const deleteProductMultimedia = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
+  .middleware([writeMiddleware])
   .inputValidator(deleteProductMultimediaInput)
   .handler(({ data }) => deleteHandler(data));
 
@@ -102,6 +102,6 @@ async function updateOrderHandler(input: z.infer<typeof reorderProductMultimedia
 }
 
 export const reorderProductMultimedia = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
+  .middleware([writeMiddleware])
   .inputValidator(reorderProductMultimediaInput)
   .handler(({ data }) => updateOrderHandler(data));

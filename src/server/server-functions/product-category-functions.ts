@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { and, eq } from "drizzle-orm";
 import z from "zod";
-import { authMiddleware } from "@/lib/auth/auth-middleware";
+import { authMiddleware, writeMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
 import * as schema from "@/lib/database/schema";
 
@@ -52,7 +52,7 @@ async function createHandler(input: z.infer<typeof createProductCategoryInput>) 
 }
 
 export const createProductCategory = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
+  .middleware([writeMiddleware])
   .inputValidator(createProductCategoryInput)
   .handler(({ data }) => createHandler(data));
 
@@ -81,6 +81,6 @@ async function deleteHandler(input: z.infer<typeof deleteProductCategorySchema>)
 }
 
 export const deleteProductCategory = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
+  .middleware([writeMiddleware])
   .inputValidator(deleteProductCategorySchema)
   .handler(({ data }) => deleteHandler(data));

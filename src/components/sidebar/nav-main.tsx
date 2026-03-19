@@ -1,7 +1,9 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import clsx from "clsx";
 import { PackageIcon, PackageOpenIcon, SettingsIcon, TagIcon, UsersRoundIcon } from "lucide-react";
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton } from "@/components/ui/sidebar";
+import { authClient } from "@/lib/auth/auth-client";
+import { filterNavigationItemsByRole } from "@/lib/auth/navigation-access";
 import type { LucideIcon } from "lucide-react";
 import type { AppIconKey, AppNavigationItem } from "@/config/app";
 
@@ -34,6 +36,21 @@ function renderNavigationItem(item: AppNavigationItem, pathname: string) {
 
 export function NavMain({ items }: NavMainProps) {
   const pathname = useLocation({ select: (location) => location.pathname });
+  const { data: session, isPending } = authClient.useSession();
 
-  return <SidebarMenu className="p-2">{items.map((item) => renderNavigationItem(item, pathname))}</SidebarMenu>;
+  if (isPending) {
+    return (
+      <SidebarMenu className="p-2">
+        {items.map((item) => (
+          <SidebarMenuItem key={item.title}>
+            <SidebarMenuSkeleton showIcon />
+          </SidebarMenuItem>
+        ))}
+      </SidebarMenu>
+    );
+  }
+
+  const navigationItems = filterNavigationItemsByRole(items, session?.user.role);
+
+  return <SidebarMenu className="p-2">{navigationItems.map((item) => renderNavigationItem(item, pathname))}</SidebarMenu>;
 }

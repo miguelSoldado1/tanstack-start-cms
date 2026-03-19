@@ -3,7 +3,7 @@ import { getRequestHeaders } from "@tanstack/react-start/server";
 import { eq } from "drizzle-orm";
 import z from "zod";
 import { auth } from "@/lib/auth/auth";
-import { authMiddleware } from "@/lib/auth/auth-middleware";
+import { writeMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
 import { user } from "@/lib/database/schema";
 import { deleteBackblazeObject } from "@/lib/storage/backblaze";
@@ -56,7 +56,7 @@ async function saveProfileImageHandler(userId: string, input: z.infer<typeof sav
 }
 
 export const saveProfileImage = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
+  .middleware([writeMiddleware])
   .inputValidator(saveProfileImageInput)
   .handler(({ context, data }) => saveProfileImageHandler(context.user.id, data));
 
@@ -78,5 +78,5 @@ async function removeProfileImageHandler(userId: string) {
 }
 
 export const removeProfileImage = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
+  .middleware([writeMiddleware])
   .handler(({ context }) => removeProfileImageHandler(context.user.id));

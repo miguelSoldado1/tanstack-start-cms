@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { count } from "drizzle-orm";
-import { authMiddleware } from "@/lib/auth/auth-middleware";
+import { adminMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
 import * as schema from "@/lib/database/schema";
 import { buildQueryParams, getTableDataInput, type TableQueryConfig } from "../table-query";
@@ -45,6 +45,6 @@ async function getTableHandler(input: z.infer<typeof getTableDataInput>) {
 }
 
 export const getTableUsers = createServerFn()
-  .middleware([authMiddleware])
+  .middleware([adminMiddleware])
   .inputValidator(getTableDataInput)
   .handler(({ data }) => getTableHandler(data));

@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { count, eq } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import z from "zod";
-import { authMiddleware } from "@/lib/auth/auth-middleware";
+import { authMiddleware, writeMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
 import * as schema from "@/lib/database/schema";
 import { buildQueryParams, getTableDataInput, type TableQueryConfig } from "../table-query";
@@ -81,7 +81,7 @@ async function createHandler(input: z.infer<typeof createBundleInput>) {
 }
 
 export const createProductBundle = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
+  .middleware([writeMiddleware])
   .inputValidator(createBundleInput)
   .handler(({ data }) => createHandler(data));
 
@@ -107,6 +107,6 @@ async function deleteHandler(input: z.infer<typeof deleteBundleInput>) {
 }
 
 export const deleteProductBundle = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
+  .middleware([writeMiddleware])
   .inputValidator(deleteBundleInput)
   .handler(({ data }) => deleteHandler(data));

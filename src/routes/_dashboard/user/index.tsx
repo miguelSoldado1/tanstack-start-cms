@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { UserTable } from "@/components/auth/user/user-table";
 import { PageHeader, PageLayout } from "@/components/page-layout";
-import { getUser } from "@/server/server-functions/auth-functions";
+import { requireUserAccess } from "@/server/server-functions/auth-functions";
 
 export const Route = createFileRoute("/_dashboard/user/")({
   component: RouteComponent,
-  beforeLoad: () => getUser(),
+  beforeLoad: () => requireUserAccess({ data: { role: "admin" } }),
 });
 
 const TITLE = "Users";

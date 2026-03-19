@@ -15,16 +15,10 @@ export interface AppConfig {
   authTitle: string;
   authDescription: string;
   defaultAuthenticatedPath: string;
-  enabledExamples: {
-    catalog: boolean;
-  };
   navigation: AppNavigationItem[];
 }
 
-export const defaultAuthenticatedPath = "/user";
-const enabledExamples = {
-  catalog: true,
-} as const;
+export const defaultAuthenticatedPath = "/profile";
 
 const coreNavigation: AppNavigationItem[] = [{ title: "Users", url: "/user", icon: "users", roleAccess: "admin" }];
 
@@ -34,7 +28,7 @@ const catalogNavigation: AppNavigationItem[] = [
   { title: "Bundles", url: "/bundle", icon: "bundles" },
 ];
 
-const navigation: AppNavigationItem[] = [...coreNavigation, ...(enabledExamples.catalog ? catalogNavigation : [])];
+const navigation: AppNavigationItem[] = [...coreNavigation, ...catalogNavigation];
 
 export const appConfig: AppConfig = {
   appName: "Starter Dashboard",
@@ -42,6 +36,5 @@ export const appConfig: AppConfig = {
   authTitle: "Welcome to Starter Dashboard",
   authDescription: "Sign in to a reusable dashboard shell built for quick internal tools and admin workflows.",
   defaultAuthenticatedPath,
-  enabledExamples,
   navigation,
 };

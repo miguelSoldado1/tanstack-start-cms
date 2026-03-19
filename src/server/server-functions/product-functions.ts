@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { countDistinct, eq, getTableColumns, ilike, sql } from "drizzle-orm";
 import z from "zod";
-import { authMiddleware } from "@/lib/auth/auth-middleware";
+import { authMiddleware, writeMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
 import * as schema from "@/lib/database/schema";
 import { buildQueryParams, getTableDataInput, type TableQueryConfig } from "../table-query";
@@ -104,7 +104,7 @@ async function deleteHandler(input: z.infer<typeof deleteProductSchema>) {
 }
 
 export const deleteProduct = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
+  .middleware([writeMiddleware])
   .inputValidator(deleteProductSchema)
   .handler(({ data }) => deleteHandler(data));
 
@@ -133,7 +133,7 @@ async function updateHandler(input: z.infer<typeof updateProductInput>) {
 }
 
 export const updateProduct = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
+  .middleware([writeMiddleware])
   .inputValidator(updateProductInput)
   .handler(({ data }) => updateHandler(data));
 
@@ -158,7 +158,7 @@ async function createHandler(input: z.infer<typeof createProductInput>) {
 }
 
 export const createProduct = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
+  .middleware([writeMiddleware])
   .inputValidator(createProductInput)
   .handler(({ data }) => createHandler(data));
 
@@ -183,8 +183,8 @@ async function publishHandler(input: z.infer<typeof publishProductSchema>) {
   }
 }
 
-export const publishProduct = createServerFn()
-  .middleware([authMiddleware])
+export const publishProduct = createServerFn({ method: "POST" })
+  .middleware([writeMiddleware])
   .inputValidator(publishProductSchema)
   .handler(({ data }) => publishHandler(data));
 
@@ -209,8 +209,8 @@ async function unpublishHandler(input: z.infer<typeof unpublishProductSchema>) {
   }
 }
 
-export const unpublishProduct = createServerFn()
-  .middleware([authMiddleware])
+export const unpublishProduct = createServerFn({ method: "POST" })
+  .middleware([writeMiddleware])
   .inputValidator(unpublishProductSchema)
   .handler(({ data }) => unpublishHandler(data));
 
