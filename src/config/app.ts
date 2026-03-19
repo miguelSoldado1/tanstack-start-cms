@@ -18,7 +18,7 @@ export interface AppConfig {
   navigation: AppNavigationItem[];
 }
 
-export const defaultAuthenticatedPath = "/profile";
+export const defaultAuthenticatedPath = "/product";
 
 const coreNavigation: AppNavigationItem[] = [{ title: "Users", url: "/user", icon: "users", roleAccess: "admin" }];
 
