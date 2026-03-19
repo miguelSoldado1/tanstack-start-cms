@@ -24,6 +24,7 @@ export function AuthSocialProviders({ enabledProviders, setIsLoading, isLoading,
       callbackURL: appConfig.defaultAuthenticatedPath,
       errorCallbackURL: "/unauthorized",
     });
+
     if (error) {
       setIsLoading(false);
       toast.error(error.message || "Unable to continue with the selected provider.");

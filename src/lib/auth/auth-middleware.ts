@@ -13,7 +13,7 @@ function createRoleMiddleware(requiredRole?: NavigationRoleAccess) {
     }
 
     if (requiredRole && !hasNavigationRoleAccess(session.user.role, requiredRole)) {
-      throw redirect({ to: "/unauthorized" });
+      throw new Error("Unauthorized: User does not have the required role to access this resource.");
     }
 
     return await next({ context: session });

@@ -103,7 +103,7 @@ export function UserActionsDropdownMenu({ id, role }: UserActionsDropdownMenuPro
             onClick={() => impersonateUser(id)}
           >
             <EyeIcon />
-            Preview Access
+            Impersionate
           </DropdownMenuItem>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger className="data-disabled:pointer-events-none data-disabled:opacity-50">

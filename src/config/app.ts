@@ -20,20 +20,17 @@ export interface AppConfig {
 
 export const defaultAuthenticatedPath = "/product";
 
-const coreNavigation: AppNavigationItem[] = [{ title: "Users", url: "/user", icon: "users", roleAccess: "admin" }];
-
-const catalogNavigation: AppNavigationItem[] = [
+const navigation: AppNavigationItem[] = [
+  { title: "Users", url: "/user", icon: "users", roleAccess: "admin" },
   { title: "Products", url: "/product", icon: "products" },
   { title: "Categories", url: "/category", icon: "categories" },
   { title: "Bundles", url: "/bundle", icon: "bundles" },
 ];
 
-const navigation: AppNavigationItem[] = [...coreNavigation, ...catalogNavigation];
-
 export const appConfig: AppConfig = {
-  appName: "Starter Dashboard",
-  appTagline: "Reusable admin shell",
-  authTitle: "Welcome to Starter Dashboard",
+  appName: "Acme Inc",
+  appTagline: "Dashboard",
+  authTitle: "Welcome to Acme Inc Dashboard",
   authDescription: "Sign in to a reusable dashboard shell built for quick internal tools and admin workflows.",
   defaultAuthenticatedPath,
   navigation,
