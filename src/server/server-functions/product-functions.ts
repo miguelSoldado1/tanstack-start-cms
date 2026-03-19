@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { countDistinct, eq, getTableColumns, ilike, sql } from "drizzle-orm";
 import z from "zod";
-import { authMiddleware, writeMiddleware } from "@/lib/auth/auth-middleware";
+import { readMiddleware, writeMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
 import * as schema from "@/lib/database/schema";
 import { buildQueryParams, getTableDataInput, type TableQueryConfig } from "../table-query";
@@ -68,7 +68,7 @@ async function getTableHandler(input: z.infer<typeof getTableDataInput>) {
 }
 
 export const getTableProducts = createServerFn()
-  .middleware([authMiddleware])
+  .middleware([readMiddleware])
   .inputValidator(getTableDataInput)
   .handler(({ data }) => getTableHandler(data));
 
@@ -84,7 +84,7 @@ async function getFirstHandler(input: z.infer<typeof getProductSchema>) {
 }
 
 export const getProduct = createServerFn()
-  .middleware([authMiddleware])
+  .middleware([readMiddleware])
   .inputValidator(getProductSchema)
   .handler(({ data }) => getFirstHandler(data));
 
@@ -235,6 +235,6 @@ async function getSelectProductsHandler(input: z.infer<typeof getSelectProductsI
 }
 
 export const getSelectProducts = createServerFn()
-  .middleware([authMiddleware])
+  .middleware([readMiddleware])
   .inputValidator(getSelectProductsInput)
   .handler(({ data }) => getSelectProductsHandler(data));

@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { count, eq, ilike, sql } from "drizzle-orm";
 import z from "zod";
-import { authMiddleware, writeMiddleware } from "@/lib/auth/auth-middleware";
+import { readMiddleware, writeMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
 import * as schema from "@/lib/database/schema";
 import { buildQueryParams, getTableDataInput, type TableQueryConfig } from "../table-query";
@@ -47,7 +47,7 @@ async function getTableHandler(input: z.infer<typeof getTableDataInput>) {
 }
 
 export const getTableCategories = createServerFn()
-  .middleware([authMiddleware])
+  .middleware([readMiddleware])
   .inputValidator(getTableDataInput)
   .handler(({ data }) => getTableHandler(data));
 
@@ -72,7 +72,7 @@ async function getSelectCategoriesHandler(input: z.infer<typeof selectCategoryIn
 }
 
 export const getSelectCategories = createServerFn()
-  .middleware([authMiddleware])
+  .middleware([readMiddleware])
   .inputValidator(selectCategoryInput)
   .handler(({ data }) => getSelectCategoriesHandler(data));
 
@@ -88,7 +88,7 @@ async function getFirstHandler(input: z.infer<typeof getCategorySchema>) {
 }
 
 export const getCategory = createServerFn()
-  .middleware([authMiddleware])
+  .middleware([readMiddleware])
   .inputValidator(getCategorySchema)
   .handler(({ data }) => getFirstHandler(data));
 

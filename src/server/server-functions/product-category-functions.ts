@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { and, eq } from "drizzle-orm";
 import z from "zod";
-import { authMiddleware, writeMiddleware } from "@/lib/auth/auth-middleware";
+import { readMiddleware, writeMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
 import * as schema from "@/lib/database/schema";
 
@@ -25,7 +25,7 @@ async function getAllHandler(input: z.infer<typeof getAllProductCategoriesInput>
 }
 
 export const getAllProductCategories = createServerFn()
-  .middleware([authMiddleware])
+  .middleware([readMiddleware])
   .inputValidator(getAllProductCategoriesInput)
   .handler(({ data }) => getAllHandler(data));
 

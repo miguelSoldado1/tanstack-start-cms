@@ -2,12 +2,12 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { appConfig } from "@/config/app";
-import { getUser } from "@/server/server-functions/auth-functions";
+import { requireUserAccess } from "@/server/server-functions/auth-functions";
 
 export const Route = createFileRoute("/_dashboard")({
   component: RouteComponent,
   beforeLoad: async () => {
-    const user = await getUser();
+    const user = await requireUserAccess({ data: { role: "read" } });
     if (!user) {
       throw redirect({ to: "/sign-in" });
     }

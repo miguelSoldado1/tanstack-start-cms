@@ -2,7 +2,6 @@ import { redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import { z } from "zod";
-import { appConfig } from "@/config/app";
 import { auth } from "@/lib/auth/auth";
 import { hasNavigationRoleAccess } from "@/lib/auth/navigation-access";
 import type { NavigationRoleAccess } from "@/config/app";
@@ -33,7 +32,7 @@ export const requireUserAccess = createServerFn()
     const requiredRole = data?.role as NavigationRoleAccess | undefined;
 
     if (requiredRole && !hasNavigationRoleAccess(user.role, requiredRole)) {
-      throw redirect({ to: appConfig.defaultAuthenticatedPath });
+      throw redirect({ to: "/unauthorized" });
     }
 
     return user;

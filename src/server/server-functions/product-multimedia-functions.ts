@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { asc, desc, eq } from "drizzle-orm";
 import z from "zod";
-import { authMiddleware, writeMiddleware } from "@/lib/auth/auth-middleware";
+import { readMiddleware, writeMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
 import * as schema from "@/lib/database/schema";
 import { deleteBackblazeObject, getBackblazeObjectKey, getBackblazeObjectUrl } from "@/lib/storage/backblaze";
@@ -16,7 +16,7 @@ async function getAllByIdHandler(input: z.infer<typeof getProductMultimediaInput
 }
 
 export const getProductMultimediaById = createServerFn()
-  .middleware([authMiddleware])
+  .middleware([readMiddleware])
   .inputValidator(getProductMultimediaInput)
   .handler(({ data }) => getAllByIdHandler(data));
 

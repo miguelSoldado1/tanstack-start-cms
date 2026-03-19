@@ -6,14 +6,16 @@ const roleAccessRank: Record<NavigationRoleAccess, number> = {
   admin: 2,
 };
 
-export function normalizeNavigationRole(role?: string | null): NavigationRoleAccess {
+export function normalizeNavigationRole(role?: string | null): NavigationRoleAccess | null {
   switch (role) {
     case "admin":
       return "admin";
     case "write":
       return "write";
-    default:
+    case "read":
       return "read";
+    default:
+      return null;
   }
 }
 
@@ -22,7 +24,13 @@ export function hasNavigationRoleAccess(role: string | null | undefined, require
     return true;
   }
 
-  return roleAccessRank[normalizeNavigationRole(role)] >= roleAccessRank[requiredRole];
+  const normalizedRole = normalizeNavigationRole(role);
+
+  if (!normalizedRole) {
+    return false;
+  }
+
+  return roleAccessRank[normalizedRole] >= roleAccessRank[requiredRole];
 }
 
 export function filterNavigationItemsByRole(items: AppNavigationItem[], role?: string | null): AppNavigationItem[] {

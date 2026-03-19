@@ -58,15 +58,15 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 function NotFound() {
   return (
     <main className="flex min-h-screen items-center justify-center p-6">
-      <Empty className="max-w-md border">
+      <Empty className="min-h-96 max-w-2xl border-destructive/30 shadow-sm">
         <EmptyHeader>
-          <EmptyMedia variant="icon">
+          <EmptyMedia className="rounded-2xl text-destructive [&_svg]:size-7" variant="icon">
             <FileQuestionIcon />
           </EmptyMedia>
-          <EmptyTitle>Page not found</EmptyTitle>
+          <EmptyTitle className="text-destructive">Page not found</EmptyTitle>
           <EmptyDescription>The page you requested does not exist or is no longer available.</EmptyDescription>
         </EmptyHeader>
-        <Button asChild>
+        <Button asChild variant="destructive">
           <Link to="/">Go to dashboard</Link>
         </Button>
       </Empty>

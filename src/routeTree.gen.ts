@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UnauthorizedRouteImport } from './routes/unauthorized'
 import { Route as DashboardRouteRouteImport } from './routes/_dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiUploadRouteImport } from './routes/api/upload'
@@ -23,6 +24,11 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as DashboardProductCreateRouteImport } from './routes/_dashboard/product/create'
 import { Route as DashboardProductEditIdRouteImport } from './routes/_dashboard/product/edit.$id'
 
+const UnauthorizedRoute = UnauthorizedRouteImport.update({
+  id: '/unauthorized',
+  path: '/unauthorized',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
   id: '/_dashboard',
   getParentRoute: () => rootRouteImport,
@@ -90,6 +96,7 @@ const DashboardProductEditIdRoute = DashboardProductEditIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/unauthorized': typeof UnauthorizedRoute
   '/sign-in': typeof AuthSignInRoute
   '/sign-up': typeof AuthSignUpRoute
   '/api/upload': typeof ApiUploadRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/unauthorized': typeof UnauthorizedRoute
   '/sign-in': typeof AuthSignInRoute
   '/sign-up': typeof AuthSignUpRoute
   '/api/upload': typeof ApiUploadRoute
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_dashboard': typeof DashboardRouteRouteWithChildren
+  '/unauthorized': typeof UnauthorizedRoute
   '/_auth/sign-in': typeof AuthSignInRoute
   '/_auth/sign-up': typeof AuthSignUpRoute
   '/api/upload': typeof ApiUploadRoute
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/unauthorized'
     | '/sign-in'
     | '/sign-up'
     | '/api/upload'
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/unauthorized'
     | '/sign-in'
     | '/sign-up'
     | '/api/upload'
@@ -165,6 +176,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_dashboard'
+    | '/unauthorized'
     | '/_auth/sign-in'
     | '/_auth/sign-up'
     | '/api/upload'
@@ -181,6 +193,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
+  UnauthorizedRoute: typeof UnauthorizedRoute
   AuthSignInRoute: typeof AuthSignInRoute
   AuthSignUpRoute: typeof AuthSignUpRoute
   ApiUploadRoute: typeof ApiUploadRoute
@@ -189,6 +202,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/unauthorized': {
+      id: '/unauthorized'
+      path: '/unauthorized'
+      fullPath: '/unauthorized'
+      preLoaderRoute: typeof UnauthorizedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_dashboard': {
       id: '/_dashboard'
       path: ''
@@ -310,6 +330,7 @@ const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
+  UnauthorizedRoute: UnauthorizedRoute,
   AuthSignInRoute: AuthSignInRoute,
   AuthSignUpRoute: AuthSignUpRoute,
   ApiUploadRoute: ApiUploadRoute,
