@@ -1,12 +1,12 @@
-Welcome to your new TanStack app! 
+Welcome to your new TanStack app!
 
 # Getting Started
 
 To run this application:
 
 ```bash
-npm install
-npm run start
+pnpm install
+pnpm dev
 ```
 
 # Building For Production
@@ -14,7 +14,22 @@ npm run start
 To build this application for production:
 
 ```bash
-npm run build
+pnpm build
+```
+
+To preview the production build locally:
+
+```bash
+pnpm preview
+```
+
+## Deploying To Cloudflare Workers
+
+This app is configured for Cloudflare Workers using `@cloudflare/vite-plugin` and Wrangler.
+
+```bash
+pnpm cf-typegen
+pnpm deploy
 ```
 
 ## Testing

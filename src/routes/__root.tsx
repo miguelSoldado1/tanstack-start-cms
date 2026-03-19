@@ -36,7 +36,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
           <NuqsAdapter>{children}</NuqsAdapter>
-          {process.env.VERCEL_ENV !== "production" && (
+          {!import.meta.env.PROD && (
             <TanStackDevtools
               config={{
                 position: "bottom-right",

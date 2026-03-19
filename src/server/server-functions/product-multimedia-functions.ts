@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { asc, desc, eq } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import z from "zod";
 import { readMiddleware, writeMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
@@ -26,22 +26,28 @@ const createProductMultimediaInput = z.object({
 });
 
 async function createHandler(input: z.infer<typeof createProductMultimediaInput>) {
-  await db.transaction(async (tx) => {
-    const lastImage = await tx.query.productMultimedia.findFirst({
-      where: eq(schema.productMultimedia.productId, input.productId),
-      orderBy: [desc(schema.productMultimedia.order)],
-      columns: { order: true },
-    });
+  const urls = input.multimedia.map((media) => getBackblazeObjectUrl(media.objectKey));
 
-    const nextOrder = lastImage ? lastImage.order + 1 : 1;
-    await tx.insert(schema.productMultimedia).values(
-      input.multimedia.map((media, index) => ({
-        url: getBackblazeObjectUrl(media.objectKey),
-        productId: input.productId,
-        order: nextOrder + index,
-      }))
-    );
-  });
+  await db.execute(
+    sql`
+      WITH product_lock AS (
+        SELECT pg_advisory_xact_lock(${input.productId})
+      ),
+      next_order AS (
+        SELECT COALESCE(MAX("order"), 0) AS base_order
+        FROM "product_multimedia"
+        WHERE "product_id" = ${input.productId}
+      )
+      INSERT INTO "product_multimedia" ("product_id", "url", "order")
+      SELECT
+        ${input.productId},
+        url_rows.url,
+        (next_order.base_order + url_rows.ordinality)::integer
+      FROM product_lock
+      CROSS JOIN next_order
+      CROSS JOIN jsonb_array_elements_text(${JSON.stringify(urls)}::jsonb) WITH ORDINALITY AS url_rows(url, ordinality);
+    `
+  );
 }
 
 export const createProductMultimedia = createServerFn({ method: "POST" })
@@ -89,15 +95,28 @@ const reorderProductMultimediaInput = z.object({
 async function updateOrderHandler(input: z.infer<typeof reorderProductMultimediaInput>) {
   if (input.newOrderIds.length === 0) return;
 
-  const caseStatements = input.newOrderIds.map((id, idx) => `WHEN id = ${id} THEN ${idx + 1}`).join(" ");
-  const idList = input.newOrderIds.join(",");
   const updatedAt = new Date().toISOString();
 
   await db.execute(
-    `UPDATE product_multimedia
-      SET "order" = CASE ${caseStatements} END,
-          "updated_at" = '${updatedAt}'
-      WHERE product_id = ${input.productId} AND id IN (${idList});`
+    sql`
+      WITH product_lock AS (
+        SELECT pg_advisory_xact_lock(${input.productId})
+      ),
+      ordered_ids AS (
+        SELECT
+          (value)::integer AS id,
+          ordinality::integer AS sort_order
+        FROM jsonb_array_elements_text(${JSON.stringify(input.newOrderIds)}::jsonb) WITH ORDINALITY
+      )
+      UPDATE "product_multimedia" AS multimedia
+      SET
+        "order" = ordered_ids.sort_order,
+        "updated_at" = ${updatedAt}::timestamp
+      FROM product_lock
+      CROSS JOIN ordered_ids
+      WHERE multimedia."product_id" = ${input.productId}
+        AND multimedia."id" = ordered_ids.id;
+    `
   );
 }
 
