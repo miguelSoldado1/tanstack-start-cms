@@ -28,9 +28,8 @@ export function DeleteProductBundle({ id }: DeleteProductBundleProps) {
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            className="size-4 cursor-pointer text-destructive focus:text-destructive"
+            className="size-8 cursor-pointer text-destructive focus:text-destructive"
             onClick={() => setShowDeleteDialog(true)}
-            size="icon"
             variant="ghost"
           >
             <TrashIcon />
