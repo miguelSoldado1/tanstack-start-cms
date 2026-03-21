@@ -1,6 +1,6 @@
 import { Link, type LinkProps } from "@tanstack/react-router";
 import clsx from "clsx";
-import { DownloadIcon, EditIcon, EllipsisIcon, TrashIcon } from "lucide-react";
+import { DownloadIcon, EditIcon, EllipsisIcon, HistoryIcon, TrashIcon } from "lucide-react";
 import * as DropdownMenuCore from "@/components/ui/dropdown-menu";
 import { Button } from "./ui/button";
 import type { DropdownMenuItem } from "@/components/ui/dropdown-menu";
@@ -49,6 +49,15 @@ export function ActionsMenuDeleteButton({ className, ...props }: React.Component
     <DropdownMenuCore.DropdownMenuItem className={clsx("text-destructive focus:text-destructive", className)} {...props}>
       <TrashIcon className="size-4 text-destructive" />
       Delete
+    </DropdownMenuCore.DropdownMenuItem>
+  );
+}
+
+export function ActionsMenuAuditButton({ className, ...props }: React.ComponentProps<typeof DropdownMenuItem>) {
+  return (
+    <DropdownMenuCore.DropdownMenuItem className={clsx("cursor-pointer", className)} {...props}>
+      <HistoryIcon className="size-4" />
+      View audit
     </DropdownMenuCore.DropdownMenuItem>
   );
 }

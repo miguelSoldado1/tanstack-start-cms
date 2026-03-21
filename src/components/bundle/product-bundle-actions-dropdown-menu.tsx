@@ -3,27 +3,24 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import * as ActionsMenuCore from "@/components/actions-menu";
 import { EntityAuditDialog } from "@/components/audit/entity-audit-dialog";
+import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
 import { useDeleteEntity } from "@/hooks/use-delete-entity";
-import { deleteCategory } from "@/server/server-functions/category-functions";
-import { DeleteConfirmationDialog } from "../delete-confirmation-dialog";
-import { EditCategoryDialog } from "./edit-category-dialog";
+import { deleteProductBundle } from "@/server/server-functions/product-bundle-functions";
 
-interface CategoryActionsDropdownMenuProps {
+interface ProductBundleActionsDropdownMenuProps {
   id: number;
 }
 
-export function CategoryActionsDropdownMenu({ id }: CategoryActionsDropdownMenuProps) {
+export function ProductBundleActionsDropdownMenu({ id }: ProductBundleActionsDropdownMenuProps) {
   const [showAuditDialog, setShowAuditDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const queryClient = useQueryClient();
 
-  const deleteCategoryMutation = useMutation({ mutationFn: useServerFn(deleteCategory) });
-  const deleteCategoryAction = useDeleteEntity({
-    mutateAsync: () => deleteCategoryMutation.mutateAsync({ data: { id } }),
-    invalidate: () => queryClient.invalidateQueries({ queryKey: ["categories"] }),
-    entityName: "category",
-    redirectHref: "/category",
+  const mutation = useMutation({ mutationFn: useServerFn(deleteProductBundle) });
+  const deleteProductAction = useDeleteEntity({
+    mutateAsync: () => mutation.mutateAsync({ data: { id } }),
+    invalidate: () => queryClient.invalidateQueries({ queryKey: ["productBundles"] }),
+    entityName: "product bundle",
   });
 
   return (
@@ -31,22 +28,20 @@ export function CategoryActionsDropdownMenu({ id }: CategoryActionsDropdownMenuP
       <ActionsMenuCore.ActionsMenu>
         <ActionsMenuCore.ActionsMenuTriggerEllipsis />
         <ActionsMenuCore.ActionsContent>
-          <ActionsMenuCore.ActionsMenuEditItemButton onClick={() => setShowEditDialog(true)} />
           <ActionsMenuCore.ActionsMenuAuditButton onClick={() => setShowAuditDialog(true)} />
           <ActionsMenuCore.ActionsMenuDeleteButton onClick={() => setShowDeleteDialog(true)} />
         </ActionsMenuCore.ActionsContent>
       </ActionsMenuCore.ActionsMenu>
       <DeleteConfirmationDialog
-        isPending={deleteCategoryMutation.isPending}
-        onConfirm={deleteCategoryAction}
+        isPending={mutation.isPending}
+        onConfirm={deleteProductAction}
         onOpenChange={setShowDeleteDialog}
         open={showDeleteDialog}
       />
-      <EditCategoryDialog categoryId={id} onOpenChange={setShowEditDialog} open={showEditDialog} />
       <EntityAuditDialog
         entityId={id.toString()}
-        entityLabel="Category"
-        entityType="category"
+        entityLabel="Product bundle"
+        entityType="productBundle"
         onOpenChange={setShowAuditDialog}
         open={showAuditDialog}
       />

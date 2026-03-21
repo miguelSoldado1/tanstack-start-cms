@@ -5,6 +5,7 @@ import z from "zod";
 import { readMiddleware, writeMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
 import * as schema from "@/lib/database/schema";
+import { createAuditLog, getAuditActor, toAuditPayload } from "@/server/audit";
 import { buildQueryParams, getTableDataInput, type TableQueryConfig } from "../table-query";
 
 const SORT_COLUMNS = {
@@ -71,9 +72,18 @@ const createBundleInput = z.object({
   bundledProductId: z.number(),
 });
 
-async function createHandler(input: z.infer<typeof createBundleInput>) {
+async function createHandler(input: z.infer<typeof createBundleInput>, actor: ReturnType<typeof getAuditActor>) {
   try {
-    const [bundle] = await db.insert(schema.productBundle).values(input).returning({ id: schema.productBundle.id });
+    const [bundle] = await db.insert(schema.productBundle).values(input).returning();
+
+    await createAuditLog({
+      action: "create",
+      actor,
+      after: toAuditPayload(bundle),
+      entityId: bundle.id.toString(),
+      entityType: "productBundle",
+    });
+
     return bundle.id;
   } catch (error) {
     throw new Error("Failed to create product bundle", { cause: error });
@@ -83,24 +93,27 @@ async function createHandler(input: z.infer<typeof createBundleInput>) {
 export const createProductBundle = createServerFn({ method: "POST" })
   .middleware([writeMiddleware])
   .inputValidator(createBundleInput)
-  .handler(({ data }) => createHandler(data));
+  .handler(({ context, data }) => createHandler(data, getAuditActor(context)));
 
 const deleteBundleInput = z.object({
   id: z.number(),
 });
 
-async function deleteHandler(input: z.infer<typeof deleteBundleInput>) {
+async function deleteHandler(input: z.infer<typeof deleteBundleInput>, actor: ReturnType<typeof getAuditActor>) {
   try {
-    const [existingBundle] = await db
-      .select({ id: schema.productBundle.id })
-      .from(schema.productBundle)
-      .where(eq(schema.productBundle.id, input.id));
+    const [deletedBundle] = await db.delete(schema.productBundle).where(eq(schema.productBundle.id, input.id)).returning();
 
-    if (!existingBundle) {
+    if (!deletedBundle) {
       throw new Error(`Product bundle with id ${input.id} not found`);
     }
 
-    await db.delete(schema.productBundle).where(eq(schema.productBundle.id, input.id));
+    await createAuditLog({
+      action: "delete",
+      actor,
+      before: toAuditPayload(deletedBundle),
+      entityId: deletedBundle.id.toString(),
+      entityType: "productBundle",
+    });
   } catch (error) {
     throw new Error("Failed to delete product bundle", { cause: error });
   }
@@ -109,4 +122,4 @@ async function deleteHandler(input: z.infer<typeof deleteBundleInput>) {
 export const deleteProductBundle = createServerFn({ method: "POST" })
   .middleware([writeMiddleware])
   .inputValidator(deleteBundleInput)
-  .handler(({ data }) => deleteHandler(data));
+  .handler(({ context, data }) => deleteHandler(data, getAuditActor(context)));

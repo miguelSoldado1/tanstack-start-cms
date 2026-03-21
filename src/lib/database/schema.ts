@@ -1,7 +1,12 @@
 import { relations } from "drizzle-orm";
-import { boolean, decimal, integer, pgTable, serial, text, timestamp, unique } from "drizzle-orm/pg-core";
+import { boolean, decimal, index, integer, jsonb, pgTable, serial, text, timestamp, unique } from "drizzle-orm/pg-core";
 
 export * from "../auth/auth-schema";
+
+type JsonValue = boolean | null | number | string | JsonValue[] | { [key: string]: JsonValue };
+interface JsonObject {
+  [key: string]: JsonValue;
+}
 
 export const product = pgTable("product", {
   id: serial("id").primaryKey(),
@@ -82,3 +87,25 @@ export const productRelations = relations(product, ({ many }) => ({
   categories: many(productCategory),
   multimedia: many(productMultimedia),
 }));
+
+export const auditLog = pgTable(
+  "audit_log",
+  {
+    id: serial("id").primaryKey(),
+    entityType: text("entity_type").notNull(),
+    entityId: text("entity_id").notNull(),
+    action: text("action").notNull(),
+    actorUserId: text("actor_user_id"),
+    before: jsonb("before").$type<JsonObject | null>(),
+    after: jsonb("after").$type<JsonObject | null>(),
+    metadata: jsonb("metadata").$type<JsonObject | null>(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [
+    index("audit_log_entity_type_idx").on(t.entityType),
+    index("audit_log_entity_id_idx").on(t.entityId),
+    index("audit_log_action_idx").on(t.action),
+    index("audit_log_actor_user_id_idx").on(t.actorUserId),
+    index("audit_log_created_at_idx").on(t.createdAt),
+  ]
+);

@@ -1,6 +1,6 @@
 import { formatDate } from "@/lib/format";
 import { DataTableColumnHeader } from "../data-table/data-table-column-header";
-import { DeleteProductBundle } from "./delete-product-bundle";
+import { ProductBundleActionsDropdownMenu } from "./product-bundle-actions-dropdown-menu";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { productBundle } from "@/lib/database/schema";
 
@@ -56,7 +56,7 @@ export const columns: ColumnDef<typeof productBundle.$inferSelect>[] = [
   {
     id: "actions",
     cell({ row }) {
-      return <DeleteProductBundle id={row.original.id} />;
+      return <ProductBundleActionsDropdownMenu id={row.original.id} />;
     },
     size: 20,
   },

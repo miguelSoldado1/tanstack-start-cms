@@ -2,9 +2,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQueryTable } from "@/hooks/use-query-table";
 import { getTableProductBundles } from "@/server/server-functions/product-bundle-functions";
 import { DataTable } from "../data-table/data-table";
-import { DataTableAdvancedToolbar } from "../data-table/data-table-advanced-toolbar";
 import { DataTableSkeleton } from "../data-table/data-table-skeleton";
 import { DataTableSortList } from "../data-table/data-table-sort-list";
+import { DataTableToolbar } from "../data-table/data-table-toolbar";
 import { columns } from "./product-bundle-columns";
 
 export function ProductBundleTable() {
@@ -32,9 +32,9 @@ export function ProductBundleTable() {
   return (
     <section>
       <DataTable table={table}>
-        <DataTableAdvancedToolbar isLoading={query.isFetching} refetch={query.refetch} table={table}>
+        <DataTableToolbar isLoading={query.isFetching} refetch={query.refetch} table={table}>
           <DataTableSortList table={table} />
-        </DataTableAdvancedToolbar>
+        </DataTableToolbar>
       </DataTable>
     </section>
   );

@@ -5,6 +5,7 @@ import { readMiddleware, writeMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
 import * as schema from "@/lib/database/schema";
 import { deleteBackblazeObject, getBackblazeObjectKey, getBackblazeObjectUrl } from "@/lib/storage/backblaze";
+import { createAuditLog, getAuditActor, toAuditPayload } from "@/server/audit";
 
 const getProductMultimediaInput = z.object({ productId: z.number() });
 
@@ -25,7 +26,7 @@ const createProductMultimediaInput = z.object({
   productId: z.number(),
 });
 
-async function createHandler(input: z.infer<typeof createProductMultimediaInput>) {
+async function createHandler(input: z.infer<typeof createProductMultimediaInput>, actor: ReturnType<typeof getAuditActor>) {
   const urls = input.multimedia.map((media) => getBackblazeObjectUrl(media.objectKey));
 
   await db.execute(
@@ -48,30 +49,50 @@ async function createHandler(input: z.infer<typeof createProductMultimediaInput>
       CROSS JOIN jsonb_array_elements_text(${JSON.stringify(urls)}::jsonb) WITH ORDINALITY AS url_rows(url, ordinality);
     `
   );
+
+  await createAuditLog({
+    action: "create",
+    actor,
+    entityId: input.productId.toString(),
+    entityType: "productMultimedia",
+    metadata: {
+      objectKeys: input.multimedia.map((media) => media.objectKey),
+      productId: input.productId,
+      urls,
+    },
+  });
 }
 
 export const createProductMultimedia = createServerFn({ method: "POST" })
   .middleware([writeMiddleware])
   .inputValidator(createProductMultimediaInput)
-  .handler(({ data }) => createHandler(data));
+  .handler(({ context, data }) => createHandler(data, getAuditActor(context)));
 
 const deleteProductMultimediaInput = z.object({
   id: z.number(),
 });
 
-async function deleteHandler(input: z.infer<typeof deleteProductMultimediaInput>) {
+async function deleteHandler(input: z.infer<typeof deleteProductMultimediaInput>, actor: ReturnType<typeof getAuditActor>) {
   try {
-    const existingImage = await db.query.productMultimedia.findFirst({
-      where: eq(schema.productMultimedia.id, input.id),
-    });
+    const [deletedImage] = await db
+      .delete(schema.productMultimedia)
+      .where(eq(schema.productMultimedia.id, input.id))
+      .returning();
 
-    if (!existingImage) {
+    if (!deletedImage) {
       throw new Error(`Image with id ${input.id} not found`);
     }
 
-    await db.delete(schema.productMultimedia).where(eq(schema.productMultimedia.id, input.id));
+    await createAuditLog({
+      action: "delete",
+      actor,
+      before: toAuditPayload(deletedImage),
+      entityId: deletedImage.id.toString(),
+      entityType: "productMultimedia",
+      metadata: { productId: deletedImage.productId },
+    });
 
-    const objectKey = getBackblazeObjectKey(existingImage.url);
+    const objectKey = getBackblazeObjectKey(deletedImage.url);
     if (!objectKey) {
       return;
     }
@@ -85,14 +106,17 @@ async function deleteHandler(input: z.infer<typeof deleteProductMultimediaInput>
 export const deleteProductMultimedia = createServerFn({ method: "POST" })
   .middleware([writeMiddleware])
   .inputValidator(deleteProductMultimediaInput)
-  .handler(({ data }) => deleteHandler(data));
+  .handler(({ context, data }) => deleteHandler(data, getAuditActor(context)));
 
 const reorderProductMultimediaInput = z.object({
   productId: z.number(),
   newOrderIds: z.array(z.number()),
 });
 
-async function updateOrderHandler(input: z.infer<typeof reorderProductMultimediaInput>) {
+async function updateOrderHandler(
+  input: z.infer<typeof reorderProductMultimediaInput>,
+  actor: ReturnType<typeof getAuditActor>
+) {
   if (input.newOrderIds.length === 0) return;
 
   const updatedAt = new Date().toISOString();
@@ -118,9 +142,20 @@ async function updateOrderHandler(input: z.infer<typeof reorderProductMultimedia
         AND multimedia."id" = ordered_ids.id;
     `
   );
+
+  await createAuditLog({
+    action: "reorder",
+    actor,
+    entityId: input.productId.toString(),
+    entityType: "productMultimedia",
+    metadata: {
+      newOrderIds: input.newOrderIds,
+      productId: input.productId,
+    },
+  });
 }
 
 export const reorderProductMultimedia = createServerFn({ method: "POST" })
   .middleware([writeMiddleware])
   .inputValidator(reorderProductMultimediaInput)
-  .handler(({ data }) => updateOrderHandler(data));
+  .handler(({ context, data }) => updateOrderHandler(data, getAuditActor(context)));

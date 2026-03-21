@@ -4,6 +4,7 @@ import z from "zod";
 import { readMiddleware, writeMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
 import * as schema from "@/lib/database/schema";
+import { createAuditLog, getAuditActor, toAuditPayload } from "@/server/audit";
 import { buildQueryParams, getTableDataInput, type TableQueryConfig } from "../table-query";
 
 const SORT_COLUMNS = {
@@ -90,23 +91,26 @@ export const getProduct = createServerFn()
 
 const deleteProductSchema = z.object({ id: z.number().positive() });
 
-async function deleteHandler(input: z.infer<typeof deleteProductSchema>) {
-  const [existingProduct] = await db
-    .select({ id: schema.product.id })
-    .from(schema.product)
-    .where(eq(schema.product.id, input.id));
+async function deleteHandler(input: z.infer<typeof deleteProductSchema>, actor: ReturnType<typeof getAuditActor>) {
+  const [deletedProduct] = await db.delete(schema.product).where(eq(schema.product.id, input.id)).returning();
 
-  if (!existingProduct) {
+  if (!deletedProduct) {
     throw new Error(`Product with id ${input.id} not found`);
   }
 
-  await db.delete(schema.product).where(eq(schema.product.id, input.id));
+  await createAuditLog({
+    action: "delete",
+    actor,
+    before: toAuditPayload(deletedProduct),
+    entityId: deletedProduct.id.toString(),
+    entityType: "product",
+  });
 }
 
 export const deleteProduct = createServerFn({ method: "POST" })
   .middleware([writeMiddleware])
   .inputValidator(deleteProductSchema)
-  .handler(({ data }) => deleteHandler(data));
+  .handler(({ context, data }) => deleteHandler(data, getAuditActor(context)));
 
 const updateProductInput = z.object({
   id: z.number().positive(),
@@ -116,26 +120,39 @@ const updateProductInput = z.object({
   price: z.number().min(0.01).multipleOf(0.01),
 });
 
-async function updateHandler(input: z.infer<typeof updateProductInput>) {
-  const [existingProduct] = await db
-    .select({ id: schema.product.id })
-    .from(schema.product)
-    .where(eq(schema.product.id, input.id));
+async function updateHandler(input: z.infer<typeof updateProductInput>, actor: ReturnType<typeof getAuditActor>) {
+  const [previousProduct] = await db.select().from(schema.product).where(eq(schema.product.id, input.id));
 
-  if (!existingProduct) {
+  if (!previousProduct) {
     throw new Error(`Product with id ${input.id} not found`);
   }
 
-  await db
+  const [updatedProduct] = await db
     .update(schema.product)
-    .set({ ...input, price: input.price.toFixed(2), updatedAt: new Date() })
-    .where(eq(schema.product.id, input.id));
+    .set({
+      description: input.description,
+      name: input.name,
+      price: input.price.toFixed(2),
+      sku: input.sku,
+      updatedAt: new Date(),
+    })
+    .where(eq(schema.product.id, input.id))
+    .returning();
+
+  await createAuditLog({
+    action: "update",
+    actor,
+    after: toAuditPayload(updatedProduct),
+    before: toAuditPayload(previousProduct),
+    entityId: updatedProduct.id.toString(),
+    entityType: "product",
+  });
 }
 
 export const updateProduct = createServerFn({ method: "POST" })
   .middleware([writeMiddleware])
   .inputValidator(updateProductInput)
-  .handler(({ data }) => updateHandler(data));
+  .handler(({ context, data }) => updateHandler(data, getAuditActor(context)));
 
 const createProductInput = z.object({
   name: z.string().min(2).max(100),
@@ -144,12 +161,25 @@ const createProductInput = z.object({
   price: z.number().min(0.01).multipleOf(0.01),
 });
 
-async function createHandler(input: z.infer<typeof createProductInput>) {
+async function createHandler(input: z.infer<typeof createProductInput>, actor: ReturnType<typeof getAuditActor>) {
   try {
     const [product] = await db
       .insert(schema.product)
-      .values({ ...input, price: input.price.toFixed(2) })
-      .returning({ id: schema.product.id });
+      .values({
+        description: input.description,
+        name: input.name,
+        price: input.price.toFixed(2),
+        sku: input.sku,
+      })
+      .returning();
+
+    await createAuditLog({
+      action: "create",
+      actor,
+      after: toAuditPayload(product),
+      entityId: product.id.toString(),
+      entityType: "product",
+    });
 
     return product.id;
   } catch (error) {
@@ -160,24 +190,34 @@ async function createHandler(input: z.infer<typeof createProductInput>) {
 export const createProduct = createServerFn({ method: "POST" })
   .middleware([writeMiddleware])
   .inputValidator(createProductInput)
-  .handler(({ data }) => createHandler(data));
+  .handler(({ context, data }) => createHandler(data, getAuditActor(context)));
 
 const publishProductSchema = z.object({
   id: z.number().positive(),
 });
 
-async function publishHandler(input: z.infer<typeof publishProductSchema>) {
+async function publishHandler(input: z.infer<typeof publishProductSchema>, actor: ReturnType<typeof getAuditActor>) {
   try {
-    const [existingProduct] = await db
-      .select({ id: schema.product.id })
-      .from(schema.product)
-      .where(eq(schema.product.id, input.id));
+    const [previousProduct] = await db.select().from(schema.product).where(eq(schema.product.id, input.id));
 
-    if (!existingProduct) {
+    if (!previousProduct) {
       throw new Error(`Product with id ${input.id} not found`);
     }
 
-    await db.update(schema.product).set({ published: true, updatedAt: new Date() }).where(eq(schema.product.id, input.id));
+    const [updatedProduct] = await db
+      .update(schema.product)
+      .set({ published: true, updatedAt: new Date() })
+      .where(eq(schema.product.id, input.id))
+      .returning();
+
+    await createAuditLog({
+      action: "publish",
+      actor,
+      after: toAuditPayload(updatedProduct),
+      before: toAuditPayload(previousProduct),
+      entityId: updatedProduct.id.toString(),
+      entityType: "product",
+    });
   } catch (error) {
     throw new Error("Failed to publish product", { cause: error });
   }
@@ -186,24 +226,34 @@ async function publishHandler(input: z.infer<typeof publishProductSchema>) {
 export const publishProduct = createServerFn({ method: "POST" })
   .middleware([writeMiddleware])
   .inputValidator(publishProductSchema)
-  .handler(({ data }) => publishHandler(data));
+  .handler(({ context, data }) => publishHandler(data, getAuditActor(context)));
 
 const unpublishProductSchema = z.object({
   id: z.number().positive(),
 });
 
-async function unpublishHandler(input: z.infer<typeof unpublishProductSchema>) {
+async function unpublishHandler(input: z.infer<typeof unpublishProductSchema>, actor: ReturnType<typeof getAuditActor>) {
   try {
-    const [existingProduct] = await db
-      .select({ id: schema.product.id })
-      .from(schema.product)
-      .where(eq(schema.product.id, input.id));
+    const [previousProduct] = await db.select().from(schema.product).where(eq(schema.product.id, input.id));
 
-    if (!existingProduct) {
+    if (!previousProduct) {
       throw new Error(`Product with id ${input.id} not found`);
     }
 
-    await db.update(schema.product).set({ published: false, updatedAt: new Date() }).where(eq(schema.product.id, input.id));
+    const [updatedProduct] = await db
+      .update(schema.product)
+      .set({ published: false, updatedAt: new Date() })
+      .where(eq(schema.product.id, input.id))
+      .returning();
+
+    await createAuditLog({
+      action: "unpublish",
+      actor,
+      after: toAuditPayload(updatedProduct),
+      before: toAuditPayload(previousProduct),
+      entityId: updatedProduct.id.toString(),
+      entityType: "product",
+    });
   } catch (error) {
     throw new Error("Failed to unpublish product", { cause: error });
   }
@@ -212,7 +262,7 @@ async function unpublishHandler(input: z.infer<typeof unpublishProductSchema>) {
 export const unpublishProduct = createServerFn({ method: "POST" })
   .middleware([writeMiddleware])
   .inputValidator(unpublishProductSchema)
-  .handler(({ data }) => unpublishHandler(data));
+  .handler(({ context, data }) => unpublishHandler(data, getAuditActor(context)));
 
 const getSelectProductsInput = z.object({
   search: z.string().trim().optional(),

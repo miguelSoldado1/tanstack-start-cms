@@ -4,6 +4,7 @@ import z from "zod";
 import { readMiddleware, writeMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
 import * as schema from "@/lib/database/schema";
+import { createAuditLog, getAuditActor, toAuditPayload } from "@/server/audit";
 
 const getAllProductCategoriesInput = z.object({ productId: z.number() });
 
@@ -34,7 +35,7 @@ const createProductCategoryInput = z.object({
   categoryId: z.coerce.number(),
 });
 
-async function createHandler(input: z.infer<typeof createProductCategoryInput>) {
+async function createHandler(input: z.infer<typeof createProductCategoryInput>, actor: ReturnType<typeof getAuditActor>) {
   try {
     const [existingProduct] = await db
       .select({ id: schema.product.id })
@@ -45,7 +46,18 @@ async function createHandler(input: z.infer<typeof createProductCategoryInput>) 
       throw new Error(`Product with id ${input.productId} not found`);
     }
 
-    await db.insert(schema.productCategory).values({ productId: input.productId, categoryId: input.categoryId });
+    const [relation] = await db
+      .insert(schema.productCategory)
+      .values({ categoryId: input.categoryId, productId: input.productId })
+      .returning();
+
+    await createAuditLog({
+      action: "create",
+      actor,
+      after: toAuditPayload(relation),
+      entityId: relation.id.toString(),
+      entityType: "productCategory",
+    });
   } catch (error) {
     throw new Error("Failed to create product category", { cause: error });
   }
@@ -54,27 +66,31 @@ async function createHandler(input: z.infer<typeof createProductCategoryInput>) 
 export const createProductCategory = createServerFn({ method: "POST" })
   .middleware([writeMiddleware])
   .inputValidator(createProductCategoryInput)
-  .handler(({ data }) => createHandler(data));
+  .handler(({ context, data }) => createHandler(data, getAuditActor(context)));
 
 const deleteProductCategorySchema = z.object({
   id: z.number().positive(),
   productId: z.number().positive(),
 });
 
-async function deleteHandler(input: z.infer<typeof deleteProductCategorySchema>) {
+async function deleteHandler(input: z.infer<typeof deleteProductCategorySchema>, actor: ReturnType<typeof getAuditActor>) {
   try {
-    const [existingProductCategory] = await db
-      .select({ id: schema.productCategory.id })
-      .from(schema.productCategory)
-      .where(and(eq(schema.productCategory.id, input.id), eq(schema.productCategory.productId, input.productId)));
+    const [deletedRelation] = await db
+      .delete(schema.productCategory)
+      .where(and(eq(schema.productCategory.id, input.id), eq(schema.productCategory.productId, input.productId)))
+      .returning();
 
-    if (!existingProductCategory) {
+    if (!deletedRelation) {
       throw new Error(`Product category with id ${input.id} not found`);
     }
 
-    await db
-      .delete(schema.productCategory)
-      .where(and(eq(schema.productCategory.id, input.id), eq(schema.productCategory.productId, input.productId)));
+    await createAuditLog({
+      action: "delete",
+      actor,
+      before: toAuditPayload(deletedRelation),
+      entityId: deletedRelation.id.toString(),
+      entityType: "productCategory",
+    });
   } catch (error) {
     throw new Error("Failed to delete product category", { cause: error });
   }
@@ -83,4 +99,4 @@ async function deleteHandler(input: z.infer<typeof deleteProductCategorySchema>)
 export const deleteProductCategory = createServerFn({ method: "POST" })
   .middleware([writeMiddleware])
   .inputValidator(deleteProductCategorySchema)
-  .handler(({ data }) => deleteHandler(data));
+  .handler(({ context, data }) => deleteHandler(data, getAuditActor(context)));

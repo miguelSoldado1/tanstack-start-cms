@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import * as ActionsMenuCore from "@/components/actions-menu";
+import { EntityAuditDialog } from "@/components/audit/entity-audit-dialog";
 import { useDeleteEntity } from "@/hooks/use-delete-entity";
 import { deleteProduct } from "@/server/server-functions/product-functions";
 import { DeleteConfirmationDialog } from "../delete-confirmation-dialog";
@@ -11,6 +12,7 @@ interface ProductActionsDropdownMenuProps {
 }
 
 export function ProductActionsDropdownMenu({ id }: ProductActionsDropdownMenuProps) {
+  const [showAuditDialog, setShowAuditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const queryClient = useQueryClient();
 
@@ -27,6 +29,7 @@ export function ProductActionsDropdownMenu({ id }: ProductActionsDropdownMenuPro
         <ActionsMenuCore.ActionsMenuTriggerEllipsis />
         <ActionsMenuCore.ActionsContent>
           <ActionsMenuCore.ActionsMenuEditItemLink params={{ id: id.toString() }} to={"/product/edit/$id"} />
+          <ActionsMenuCore.ActionsMenuAuditButton onClick={() => setShowAuditDialog(true)} />
           <ActionsMenuCore.ActionsMenuDeleteButton
             className="cursor-pointer text-destructive focus:text-destructive"
             disabled={mutation.isPending}
@@ -39,6 +42,13 @@ export function ProductActionsDropdownMenu({ id }: ProductActionsDropdownMenuPro
         onConfirm={deleteProductAction}
         onOpenChange={setShowDeleteDialog}
         open={showDeleteDialog}
+      />
+      <EntityAuditDialog
+        entityId={id.toString()}
+        entityLabel="Product"
+        entityType="product"
+        onOpenChange={setShowAuditDialog}
+        open={showAuditDialog}
       />
     </>
   );

@@ -4,6 +4,7 @@ import z from "zod";
 import { readMiddleware, writeMiddleware } from "@/lib/auth/auth-middleware";
 import { db } from "@/lib/database/drizzle";
 import * as schema from "@/lib/database/schema";
+import { createAuditLog, getAuditActor, toAuditPayload } from "@/server/audit";
 import { buildQueryParams, getTableDataInput, type TableQueryConfig } from "../table-query";
 
 const SORT_COLUMNS = {
@@ -94,35 +95,47 @@ export const getCategory = createServerFn()
 
 const deleteCategorySchema = z.object({ id: z.number().positive() });
 
-async function deleteHandler(input: z.infer<typeof deleteCategorySchema>) {
+async function deleteHandler(input: z.infer<typeof deleteCategorySchema>, actor: ReturnType<typeof getAuditActor>) {
   try {
-    const [existingCategory] = await db
-      .select({ id: schema.category.id })
-      .from(schema.category)
-      .where(eq(schema.category.id, input.id));
+    const [deletedCategory] = await db.delete(schema.category).where(eq(schema.category.id, input.id)).returning();
 
-    if (!existingCategory) {
+    if (!deletedCategory) {
       throw new Error(`Category with id ${input.id} not found`);
     }
 
-    await db.delete(schema.category).where(eq(schema.category.id, input.id));
+    await createAuditLog({
+      action: "delete",
+      actor,
+      before: toAuditPayload(deletedCategory),
+      entityId: deletedCategory.id.toString(),
+      entityType: "category",
+    });
   } catch (error) {
-    throw new Error("Failed to update category", { cause: error });
+    throw new Error("Failed to delete category", { cause: error });
   }
 }
 
 export const deleteCategory = createServerFn({ method: "POST" })
   .middleware([writeMiddleware])
   .inputValidator(deleteCategorySchema)
-  .handler(({ data }) => deleteHandler(data));
+  .handler(({ context, data }) => deleteHandler(data, getAuditActor(context)));
 
 const createCategoryInput = z.object({
   name: z.string().min(2).max(100),
 });
 
-async function createHandler(input: z.infer<typeof createCategoryInput>) {
+async function createHandler(input: z.infer<typeof createCategoryInput>, actor: ReturnType<typeof getAuditActor>) {
   try {
-    const [category] = await db.insert(schema.category).values(input).returning({ id: schema.category.id });
+    const [category] = await db.insert(schema.category).values({ name: input.name }).returning();
+
+    await createAuditLog({
+      action: "create",
+      actor,
+      after: toAuditPayload(category),
+      entityId: category.id.toString(),
+      entityType: "category",
+    });
+
     return category.id;
   } catch (error) {
     throw new Error("Failed to create category", { cause: error });
@@ -132,28 +145,35 @@ async function createHandler(input: z.infer<typeof createCategoryInput>) {
 export const createCategory = createServerFn({ method: "POST" })
   .middleware([writeMiddleware])
   .inputValidator(createCategoryInput)
-  .handler(({ data }) => createHandler(data));
+  .handler(({ context, data }) => createHandler(data, getAuditActor(context)));
 
 const updateCategorySchema = z.object({
   id: z.number().positive(),
   name: z.string().min(2).max(100),
 });
 
-async function updateHandler(input: z.infer<typeof updateCategorySchema>) {
+async function updateHandler(input: z.infer<typeof updateCategorySchema>, actor: ReturnType<typeof getAuditActor>) {
   try {
-    const [existingCategory] = await db
-      .select({ id: schema.category.id })
-      .from(schema.category)
-      .where(eq(schema.category.id, input.id));
+    const [previousCategory] = await db.select().from(schema.category).where(eq(schema.category.id, input.id));
 
-    if (!existingCategory) {
+    if (!previousCategory) {
       throw new Error(`Category with id ${input.id} not found`);
     }
 
-    await db
+    const [updatedCategory] = await db
       .update(schema.category)
       .set({ name: input.name, updatedAt: new Date() })
-      .where(eq(schema.category.id, input.id));
+      .where(eq(schema.category.id, input.id))
+      .returning();
+
+    await createAuditLog({
+      action: "update",
+      actor,
+      after: toAuditPayload(updatedCategory),
+      before: toAuditPayload(previousCategory),
+      entityId: updatedCategory.id.toString(),
+      entityType: "category",
+    });
   } catch (error) {
     throw new Error("Failed to update category", { cause: error });
   }
@@ -162,4 +182,4 @@ async function updateHandler(input: z.infer<typeof updateCategorySchema>) {
 export const updateCategory = createServerFn({ method: "POST" })
   .middleware([writeMiddleware])
   .inputValidator(updateCategorySchema)
-  .handler(({ data }) => updateHandler(data));
+  .handler(({ context, data }) => updateHandler(data, getAuditActor(context)));
