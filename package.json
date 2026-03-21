@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev --port 3000",
+    "dev:cf": "vite dev --mode cloudflare --port 3000",
     "build": "vite build && tsc --noEmit",
     "preview": "vite preview",
     "serve": "vite preview",
